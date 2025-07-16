@@ -15,6 +15,8 @@
       color: #fff;
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
+      height: 100vh;
+      overflow: hidden;
     }
     button, input, select {
       font-size: 1rem;
@@ -37,8 +39,9 @@
       padding: 0 8px;
     }
     canvas {
-      max-width: 100vw;
-      max-height: 70vh;
+      width: 100vw;
+      max-width: 480px;
+      height: auto;
       display: block;
       margin: 0 auto;
       touch-action: none;
@@ -140,12 +143,25 @@
     // 画布高分屏适配，保证完整显示
     function fixCanvasDpi(canvas) {
       const dpr = window.devicePixelRatio || 1;
-      // 以父容器宽度为准，最大宽度 480px
+      // 计算按钮区高度
+      const infoH = document.getElementById('info').offsetHeight || 0;
+      const lifeBarH = document.getElementById('life-bar').offsetHeight || 0;
+      const speedBtnH = document.getElementById('speed-btn').offsetHeight || 0;
+      const pauseBtnH = document.getElementById('pause-btn').offsetHeight || 0;
+      const startBtn = document.getElementById('start-btn');
+      const startBtnH = (startBtn && startBtn.style.display !== 'none') ? startBtn.offsetHeight : 0;
+      const topPanel = infoH + lifeBarH + speedBtnH + pauseBtnH + startBtnH + 40; // 额外间距
+      // 可用高度
+      const availH = window.innerHeight - topPanel - 16; // 16为底部安全距离
       const maxW = Math.min(window.innerWidth, 480);
-      // 高度按 400:960 比例
+      // 保持原始宽高比
       const ratio = 960 / 400;
-      const width = maxW;
-      const height = Math.round(width * ratio);
+      let width = maxW;
+      let height = Math.min(Math.round(width * ratio), availH);
+      // 若高度受限，宽度也要等比缩放
+      if (height < width * ratio) {
+        width = Math.round(height / ratio);
+      }
       canvas.style.width = width + 'px';
       canvas.style.height = height + 'px';
       canvas.width = width * dpr;
