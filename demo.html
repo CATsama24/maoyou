@@ -209,11 +209,11 @@
         // 伤害值
         this.damage = this.type === 'archer' ? 3 : (this.type === 'fire' ? 6 : (this.type === 'lightning' ? 5 : 0.5));
         // 激光哥tick和持续
-        this.laserWidth = 8;
+        this.laserWidth = 16;
         this.laserDuration = 2000; // 激光哥持续2秒
         this.laserAlphaTick = 1;
         this.laserCombo = 1;
-        this.laserDamage = this.type === 'laser' ? 0.5 : 0.3; // 激光哥每0.2秒0.5点
+        this.laserDamage = this.type === 'laser' ? 1 : 0.3; // 激光哥每0.2秒1点
         this.laserDurationBonus = 0;
         this.laserWidthBonus = 0;
         this.fireExplosionRadius = 8 * 6;
@@ -229,32 +229,38 @@
       }
       attack(enemies, bullets, effects) {
         const now = Date.now();
+        if (this.isComboing) return;
         if (now - this.lastAttack < this.getCooldown() / speedMultiplier) return;
-        // 连击：每次攻击都包含当前的子弹+1效果
-        const doAttack = () => {
+        const combo = this.getCombo();
+        let comboCount = 0;
+        this.isComboing = true;
+        const doCombo = () => {
           switch(this.config.skill) {
             case "arrow":
-              this.arrowAttack(enemies, bullets, 0);
+              this.arrowAttack(enemies, bullets, comboCount);
               break;
             case "laser":
-              this.laserAttack(enemies, effects, 0);
+              this.laserAttack(enemies, effects, comboCount);
               break;
             case "fireball":
-              this.fireballAttack(enemies, bullets, effects, 0);
+              this.fireballAttack(enemies, bullets, effects, comboCount);
               break;
             case "ice":
-              this.iceAttack(enemies, bullets, effects, 0);
+              this.iceAttack(enemies, bullets, effects, comboCount);
               break;
             case "lightning":
-              this.lightningAttack(enemies, effects, 0);
+              this.lightningAttack(enemies, effects, comboCount);
               break;
           }
-        };
-        doAttack();
-        if (this.getCombo() > 1) {
-          setTimeout(() => doAttack(), 250 / speedMultiplier);
-        }
+          comboCount++;
+          if (comboCount < combo) {
+            setTimeout(doCombo, 200 / speedMultiplier);
+          } else {
         this.lastAttack = Date.now();
+            this.isComboing = false;
+          }
+        };
+        doCombo();
       }
       getCooldown() {
         switch(this.config.skill) {
@@ -277,7 +283,7 @@
       arrowAttack(enemies, bullets, comboIdx) {
         const target = this.findTarget(enemies);
         if (!target) return;
-        const baseAngle = Math.atan2(target.position.y - this.position.y, target.position.x - this.position.x);
+          const baseAngle = Math.atan2(target.position.y - this.position.y, target.position.x - this.position.x);
         const angleStep = 0.14; // 子弹间隔角度
         const n = this.bulletCount;
         if (n % 2 === 1) {
@@ -285,14 +291,14 @@
           const center = (n - 1) / 2;
           for (let i = 0; i < n; i++) {
             const angle = baseAngle + (i - center) * angleStep;
-            bullets.push(new Bullet(this.position, angle, 15, this.damage, "arrow", 1, this.type, this.bulletSplit));
+            bullets.push(new Bullet(this.position, angle, 16, this.damage, "arrow", 1, this.type, this.bulletSplit, 0, 0, 0, null, comboIdx));
           }
         } else {
           // 偶数颗：最靠近中间的左边那颗对齐敌人中心
           const leftCenter = n/2 - 1;
           for (let i = 0; i < n; i++) {
             const angle = baseAngle + (i - leftCenter) * angleStep;
-            bullets.push(new Bullet(this.position, angle, 15, this.damage, "arrow", 1, this.type, this.bulletSplit));
+            bullets.push(new Bullet(this.position, angle, 16, this.damage, "arrow", 1, this.type, this.bulletSplit, 0, 0, 0, null, comboIdx));
           }
         }
       }
@@ -343,12 +349,12 @@
       fireballAttack(enemies, bullets, effects, comboIdx) {
         const target = this.findTarget(enemies);
         if (!target) return;
-        bullets.push(new Bullet(this.position, Math.atan2(target.position.y - this.position.y, target.position.x - this.position.x), 10, this.damage * (1 + this.fireDamageBonus), "fireball", 1, this.type, 0, this.fireExplosionRadius * (1 + this.fireExplosionBonus)));
+        bullets.push(new Bullet(this.position, Math.atan2(target.position.y - this.position.y, target.position.x - this.position.x), 13, this.damage * (1 + this.fireDamageBonus), "fireball", 1, this.type, 0, this.fireExplosionRadius * (1 + this.fireExplosionBonus)));
       }
       iceAttack(enemies, bullets, effects, comboIdx) {
         const target = this.findTarget(enemies);
         if (!target) return;
-        bullets.push(new Bullet(this.position, Math.atan2(target.position.y - this.position.y, target.position.x - this.position.x), 10, 3 * (1 + this.iceDamageBonus), "ice", 3, this.type, 0, 0, this.iceFreeze));
+        bullets.push(new Bullet(this.position, Math.atan2(target.position.y - this.position.y, target.position.x - this.position.x), 13, 3 * (1 + this.iceDamageBonus), "ice", 3, this.type, 0, 0, this.iceFreeze));
       }
       lightningAttack(enemies, effects, comboIdx) {
         const target = this.findTarget(enemies);
@@ -383,11 +389,12 @@
         });
       }
       findTarget(enemies) {
+        if (this._lockedTarget) return this._lockedTarget;
+        // 兜底：原有逻辑
         const left = this.rangeLeft();
         const right = this.rangeRight();
         const top = this.rangeTop();
         const bottom = this.rangeBottom();
-        // 找到攻击范围内y值最大的敌人
         let candidates = enemies.filter(e =>
           e.visible &&
           e.position.x > left &&
@@ -402,7 +409,7 @@
 
     // ================== 子弹类 ==================
     class Bullet {
-      constructor(position, angle, speed, damage, type, pierce=1, heroType, split=0, explosionRadius=0, freeze=0, excludeTarget=null) {
+      constructor(position, angle, speed, damage, type, pierce=1, heroType, split=0, explosionRadius=0, freeze=0, excludeTarget=null, comboIdx=0) {
         this.position = { x: position.x, y: position.y };
         this.velocity = { x: speed * Math.cos(angle), y: speed * Math.sin(angle) };
         this.damage = damage;
@@ -417,6 +424,7 @@
         this.freeze = freeze;
         this.bulletSplitTimes = 0;
         this.excludeTarget = excludeTarget; // 新增：分裂子弹不能命中原目标
+        this.comboIdx = comboIdx || 0;
       }
       update() {
         this.position.x += this.velocity.x;
@@ -430,13 +438,39 @@
 
     // ================== 敌人类 ==================
     class Enemy {
-      constructor(x, y, hp, scale=1, isBoss=false, appearTime=0) {
+      constructor(x, y, hp, scale=1, isBoss=false, appearTime=0, enemyType='normal') {
         this.position = { x, y };
-        this.radius = 18 * scale;
+        if (isBoss) {
+          this.radius = 18 * scale;
+        } else if (enemyType === 'fast') {
+          this.radius = 9 * scale;
+          this.hp = Math.round(hp * 2 / 3);
+          this.maxHp = this.hp;
+        } else if (enemyType === 'tank') {
+          this.radius = 27 * scale;
+          this.hp = Math.round(hp * 2);
+          this.maxHp = this.hp;
+        } else {
+          this.radius = 18 * scale;
+        }
         this.hp = hp;
         this.maxHp = hp;
         this.alive = true;
-        this.speed = 0.25 + Math.random() * 0.5;
+        this.type = enemyType;
+        // 固定速度
+        if (isBoss) {
+          this.speed = 0.3;
+        } else if (enemyType === 'fast') {
+          this.speed = 0.9;
+          this.hp = Math.round(hp * 2 / 3);
+          this.maxHp = this.hp;
+        } else if (enemyType === 'tank') {
+          this.speed = 0.3;
+          this.hp = Math.round(hp * 2);
+          this.maxHp = this.hp;
+        } else {
+          this.speed = 0.6;
+        }
         this.slowUntil = 0;
         this.stunUntil = 0;
         this.frozenUntil = 0;
@@ -448,9 +482,9 @@
         this.lastBurnTick = 0;
         this.paralyzeUntil = 0; // 麻痹结束时间
       }
-      update() {
+      update(now) {
         if (!this.visible) {
-          if (Date.now() < this.appearTime) return;
+          if (now < this.appearTime) return;
           this.visible = true;
         }
         let speed = this.speed * speedMultiplier;
@@ -474,7 +508,7 @@
         }
       }
       // 处理麻痹加伤
-      takeDamage(amount, heroType, extraText) {
+      takeDamage(amount, heroType, extraText, comboIdx=0) {
         let dmg = amount;
         let isParalyze = Date.now() < this.paralyzeUntil;
         let baseDmg = Math.max(1, Math.round(amount));
@@ -484,14 +518,14 @@
           dmg = baseDmg + paralyzeDmg;
         } else {
           dmg = baseDmg;
-        }
+    }
         this.hp -= dmg;
         // 主伤害数字
-        addDamageNumber(this.position.x, this.position.y-30, baseDmg, heroType, extraText||'');
+        addDamageNumber(this.position.x, this.position.y-30-10*(comboIdx||0), baseDmg, heroType, extraText||'');
         // 麻痹加成单独跳字
         if (isParalyze && paralyzeDmg > 0) {
           addDamageNumber(this.position.x, this.position.y-50, '+'+paralyzeDmg, 'lightning', '');
-          // 小字“麻痹”
+          // 小字"麻痹"
           damageNumbers.push({x: this.position.x, y: this.position.y-38, value: '', heroType: 'lightning', alpha: 1, vy: 0, time: 0, extra: '', small: '麻痹'});
         }
       }
@@ -546,7 +580,8 @@
         let baseHp = 6 * (1 + 0.1 * (this.currentWave - 1));
         const segments = Math.min(count, 8);
         const now = Date.now();
-        const interval = 15000; // 15秒
+        const interval = 20000; // 20秒
+        const enemyTypes = ['normal','fast','tank'];
         for (let i = 0; i < count; i++) {
           const seg = i % segments;
           const segWidth = STAGE_WIDTH / segments;
@@ -555,7 +590,9 @@
           const y = yBase + Math.random()*20 + STAGE_TOP_OFFSET;
           // 均匀分布在N秒内
           const appearTime = now + Math.floor(i * interval / count);
-          enemies.push(new Enemy(x, y, baseHp, 1, false, appearTime));
+          // 随机类型
+          const type = enemyTypes[Math.floor(Math.random()*enemyTypes.length)];
+          enemies.push(new Enemy(x, y, baseHp, 1, false, appearTime, type));
         }
         // 特殊大怪分散x/y
         const bossWaves = [5, 10, 15, 20];
@@ -645,11 +682,53 @@
 
     // ================== 攻击范围显示控制 ==================
     let selectedHeroIdx = null;
+
+    // canvas内icon参数
+    const iconPause = { x: STAGE_WIDTH-38, y: 100, r: 22 };
+    const iconSpeed = { x: STAGE_WIDTH-38, y: 156, r: 22 };
+
+    // 工具函数：判断点是否在圆内
+    function inCircle(mx, my, cx, cy, r) {
+      return (mx-cx)*(mx-cx)+(my-cy)*(my-cy) <= r*r;
+    }
+
     // 修复：PC端click事件
     canvas.addEventListener('click', function(e) {
       const rect = canvas.getBoundingClientRect();
-      const mx = e.clientX - rect.left;
-      const my = e.clientY - rect.top;
+      // 适配高分屏canvas缩放
+      const mx = (e.clientX - rect.left) * (canvas.width / canvas.offsetWidth);
+      const my = (e.clientY - rect.top) * (canvas.height / canvas.offsetHeight);
+      // 先判断icon
+      if (inCircle(mx, my, iconPause.x, iconPause.y, iconPause.r)) {
+        paused = !paused;
+        // 同步页面按钮
+        if (paused) {
+          pauseBtn.style.background = '#6cf';
+          pauseBtn.style.color = '#222';
+          pauseBtn.innerText = '继续';
+        } else {
+          pauseBtn.style.background = '#444';
+          pauseBtn.style.color = '#fff';
+          pauseBtn.innerText = '暂停';
+          requestAnimationFrame(gameLoop);
+        }
+        return;
+      }
+      if (inCircle(mx, my, iconSpeed.x, iconSpeed.y, iconSpeed.r)) {
+        if (speedMultiplier === 1) {
+          speedMultiplier = 2;
+          speedBtn.style.background = '#6cf';
+          speedBtn.style.color = '#222';
+          speedBtn.innerText = '1倍速';
+        } else {
+          speedMultiplier = 1;
+          speedBtn.style.background = '#444';
+          speedBtn.style.color = '#fff';
+          speedBtn.innerText = '2倍速';
+        }
+        return;
+      }
+      // 英雄选中逻辑
       let found = false;
       player.heroes.forEach((hero, idx) => {
         const dx = mx - hero.position.x * (canvas.width / canvas.offsetWidth);
@@ -669,8 +748,40 @@
     canvas.addEventListener('touchstart', function(e) {
       const rect = canvas.getBoundingClientRect();
       const touch = e.touches[0];
-      const mx = touch.clientX - rect.left;
-      const my = touch.clientY - rect.top;
+      const mx = (touch.clientX - rect.left) * (canvas.width / canvas.offsetWidth);
+      const my = (touch.clientY - rect.top) * (canvas.height / canvas.offsetHeight);
+      // 先判断icon
+      if (inCircle(mx, my, iconPause.x, iconPause.y, iconPause.r)) {
+        paused = !paused;
+        if (paused) {
+          pauseBtn.style.background = '#6cf';
+          pauseBtn.style.color = '#222';
+          pauseBtn.innerText = '继续';
+        } else {
+          pauseBtn.style.background = '#444';
+          pauseBtn.style.color = '#fff';
+          pauseBtn.innerText = '暂停';
+          requestAnimationFrame(gameLoop);
+        }
+        e.preventDefault();
+        return;
+      }
+      if (inCircle(mx, my, iconSpeed.x, iconSpeed.y, iconSpeed.r)) {
+        if (speedMultiplier === 1) {
+          speedMultiplier = 2;
+          speedBtn.style.background = '#6cf';
+          speedBtn.style.color = '#222';
+          speedBtn.innerText = '1倍速';
+        } else {
+          speedMultiplier = 1;
+          speedBtn.style.background = '#444';
+          speedBtn.style.color = '#fff';
+          speedBtn.innerText = '2倍速';
+        }
+        e.preventDefault();
+        return;
+      }
+      // 英雄选中逻辑
       let found = false;
       player.heroes.forEach((hero, idx) => {
         const dx = mx - hero.position.x * (canvas.width / canvas.offsetWidth);
@@ -748,20 +859,52 @@
         requestAnimationFrame(gameLoop);
       }
     }
+    let lastGameNow = Date.now();
     function gameLoop() {
-      if (paused) {
-        draw();
+      requestAnimationFrame(gameLoop);
+      let now;
+      if (paused || document.getElementById('upgrade-panel').style.display === 'flex') {
+        now = lastGameNow;
+        draw(now);
         return;
-      }
-      if (document.getElementById('upgrade-panel').style.display === 'flex') {
-        requestAnimationFrame(gameLoop);
-        return;
+      } else {
+        now = Date.now();
+        lastGameNow = now;
       }
       if (!gameStarted) {
-        draw();
-        requestAnimationFrame(gameLoop);
+        draw(now);
         return;
       }
+      // --- 新增：数组上限，防止溢出 ---
+      const MAX_ENEMIES = 500, MAX_BULLETS = 500, MAX_EFFECTS = 500;
+      if (enemies.length > MAX_ENEMIES) enemies = enemies.slice(enemies.length - MAX_ENEMIES);
+      if (bullets.length > MAX_BULLETS) bullets = bullets.slice(bullets.length - MAX_BULLETS);
+      if (effects.length > MAX_EFFECTS) effects = effects.slice(effects.length - MAX_EFFECTS);
+      // ---
+      // --- 新增：多英雄分配目标，避免重复锁定 ---
+      const lockedTargets = new Set();
+      player.heroes.forEach(hero => {
+        hero._lockedTarget = null;
+        // 找到未被锁定的最近目标
+        const left = hero.rangeLeft();
+        const right = hero.rangeRight();
+        const top = hero.rangeTop();
+        const bottom = hero.rangeBottom();
+        let candidates = enemies.filter(e =>
+          e.visible &&
+          e.position.x > left &&
+          e.position.x < right &&
+          e.position.y > top &&
+          e.position.y < bottom &&
+          !lockedTargets.has(e)
+        );
+        if (candidates.length > 0) {
+          // 距离底部最近
+          let target = candidates.reduce((maxE, e) => (e.position.y > maxE.position.y ? e : maxE), candidates[0]);
+          hero._lockedTarget = target;
+          lockedTargets.add(target);
+        }
+      });
       player.heroes.forEach(hero => {
         hero.attack(enemies, bullets, effects);
       });
@@ -794,7 +937,7 @@
       });
       bullets.forEach(b => b.update());
       bullets = bullets.filter(b => b.active);
-      enemies.forEach(e => e.update());
+      enemies.forEach(e => e.update(now));
       // 检查敌人出界扣血
       enemies.forEach(enemy => {
         if (!enemy.alive && enemy.position.y > STAGE_HEIGHT) {
@@ -803,7 +946,6 @@
         }
       });
       enemies = enemies.filter(e => e.alive && e.hp > 0);
-
       bullets.forEach(bullet => {
         enemies.forEach((enemy, idx) => {
           if (enemy.alive && enemy.visible && bullet.active && !bullet.hitEnemies.has(enemy)) {
@@ -811,8 +953,11 @@
             if (bullet.excludeTarget && bullet.excludeTarget === enemy) return;
             const dx = bullet.position.x - enemy.position.x;
             const dy = bullet.position.y - enemy.position.y;
+            // 新增：速度型敌人判定半径加大
+            let enemyRadius = enemy.radius;
+            if (enemy.type === 'fast') enemyRadius += 4;
             const dist = Math.sqrt(dx*dx + dy*dy);
-            if (dist < bullet.radius + enemy.radius) {
+            if (dist < bullet.radius + enemyRadius) {
               bullet.hitEnemies.add(enemy);
               if (bullet.type === "fireball") {
                 // 爆炸：以命中目标为圆心，爆炸半径为3x敌人半径
@@ -821,12 +966,12 @@
                 enemies.forEach(e2 => {
                   if (e2.alive && distance(e2.position, enemy.position) <= explosionRadius) {
                     e2.takeDamage(bullet.damage, "fire");
-                    effects.push({type: "fire-flame", target: e2, start: Date.now(), duration: 350});
-                    // 引燃效果
+                    // 在爆炸/引燃处，设置burnDps为火焰哥伤害的0.1倍，持续3秒
+                    // 找到火焰哥
                     const fireHero = player.heroes.find(h=>h.type==='fire');
                     if (fireHero) {
                       e2.burnUntil = Date.now() + 3000;
-                      e2.burnDps = Math.max(1, fireHero.damage * 10);
+                      e2.burnDps = Math.max(1, fireHero.damage * (1 + fireHero.fireDamageBonus) * 0.1);
                     }
                   }
                 });
@@ -839,13 +984,11 @@
                 bullet.pierce--;
                 if (bullet.pierce <= 0) bullet.active = false;
               } else if (bullet.type === "arrow") {
-                enemy.takeDamage(bullet.damage, "archer");
+                enemy.takeDamage(bullet.damage, "archer", "", bullet.comboIdx);
                 // 子弹碰撞部分，分裂子弹生成：
                 if (bullet.split > 0 && bullet.bulletSplitTimes < 2) {
-                  // 记录已选目标，确保每个分裂子弹目标不同
                   let usedTargets = new Set([enemy]);
                   for (let s = 0; s < bullet.split; s++) {
-                    // 找到最近的未被选中的目标
                     let minDist = Infinity;
                     let nearest = null;
                     enemies.forEach(e2 => {
@@ -867,7 +1010,7 @@
                     // 分裂次数达到2时，分裂子弹有0.5s间隔
                     if (bullet.bulletSplitTimes >= 1) {
                       setTimeout(() => {
-                        bullets.push(new Bullet(
+                        const newBullet = new Bullet(
                           {x: enemy.position.x, y: enemy.position.y},
                           angle,
                           10,
@@ -878,11 +1021,14 @@
                           0,
                           0,
                           0,
-                          enemy // excludeTarget: 原目标
-                        ));
+                          enemy, // excludeTarget: 原目标
+                          bullet.comboIdx
+                        );
+                        newBullet.bulletSplitTimes = bullet.bulletSplitTimes + 1;
+                        bullets.push(newBullet);
                       }, s * 500 / speedMultiplier);
                     } else {
-                      bullets.push(new Bullet(
+                      const newBullet = new Bullet(
                         {x: enemy.position.x, y: enemy.position.y},
                         angle,
                         10,
@@ -893,8 +1039,11 @@
                         0,
                         0,
                         0,
-                        enemy // excludeTarget: 原目标
-                      ));
+                        enemy, // excludeTarget: 原目标
+                        bullet.comboIdx
+                      );
+                      newBullet.bulletSplitTimes = bullet.bulletSplitTimes + 1;
+                      bullets.push(newBullet);
                     }
                   }
                 }
@@ -918,8 +1067,7 @@
           }
         });
       });
-
-      // 刷怪逻辑（每15秒一波）
+      // 刷怪逻辑（每20秒一波）
       if (!wavePending && Date.now() >= nextWaveTime) {
         if (waveManager.currentWave < waveManager.totalWaves) {
           waveManager.nextWave();
@@ -927,7 +1075,7 @@
           player.killCount = 0;
           enemies = enemies.concat(waveManager.spawnWave());
           wavePending = true;
-          nextWaveTime = Date.now() + 15000 / speedMultiplier;
+          nextWaveTime = Date.now() + 20000 / speedMultiplier;
         }
       }
       if (wavePending) {
@@ -937,13 +1085,10 @@
       if (waveManager.currentWave === 1 && enemies.length === 0 && Date.now() >= nextWaveTime) {
         enemies = waveManager.spawnWave();
         wavePending = true;
-        // 下一波时间为10~15秒后
         nextWaveTime = Date.now() + (10000 + Math.random() * 5000);
       }
-
-      draw();
+      draw(now);
       effects = effects.filter(eff => Date.now() - eff.start < eff.duration);
-      requestAnimationFrame(gameLoop);
     }
 
     function drawFlame(ctx, x, y, scale=1) {
@@ -1009,14 +1154,14 @@
 
     // ================== 渲染函数 ==================
     function drawHeroIcon(ctx, hero) {
-      ctx.save();
+        ctx.save();
       ctx.translate(hero.position.x, hero.position.y);
       switch(hero.type) {
         case 'archer':
           // 射手哥：弓和箭
           ctx.strokeStyle = '#fff';
           ctx.lineWidth = 3;
-          ctx.beginPath();
+        ctx.beginPath();
           ctx.arc(0, 0, 18, Math.PI*0.7, Math.PI*1.3, false);
           ctx.stroke();
           ctx.beginPath();
@@ -1029,16 +1174,16 @@
           ctx.fillStyle = '#ffe066';
           ctx.beginPath();
           ctx.ellipse(0, 0, 16, 18, 0, 0, Math.PI*2);
-          ctx.fill();
+        ctx.fill();
           ctx.fillStyle = '#222';
           ctx.fillRect(-10, -4, 20, 8);
-          ctx.strokeStyle = '#fff';
+        ctx.strokeStyle = '#fff';
           ctx.lineWidth = 2;
           ctx.strokeRect(-10, -4, 20, 8);
           break;
         case 'fire':
-          // 火焰哥：火焰头
-          drawFlame(ctx, 0, 0, 0.7);
+          // 火焰哥：火焰头，整体向下偏移12像素以底部对齐
+          drawFlame(ctx, 0, 12, 0.7);
           break;
         case 'ice':
           // 寒冰哥：雪花头
@@ -1053,7 +1198,7 @@
           }
           ctx.beginPath();
           ctx.arc(0,0,7,0,Math.PI*2);
-          ctx.stroke();
+        ctx.stroke();
           break;
         case 'lightning':
           // 打雷哥：闪电头
@@ -1087,7 +1232,7 @@
           ctx.rotate(Math.PI/3*i);
           ctx.beginPath();
           ctx.moveTo(0,0); ctx.lineTo(0,-8); ctx.stroke();
-          ctx.restore();
+        ctx.restore();
         }
         ctx.beginPath();
         ctx.arc(0,0,3,0,Math.PI*2);
@@ -1114,7 +1259,30 @@
       }
       ctx.restore();
     }
-    function draw() {
+    // 1. drawHeartIcon函数
+    function drawHeartIcon(ctx, x, y, r, value) {
+        ctx.save();
+        ctx.beginPath();
+      ctx.moveTo(x, y + r * 0.3);
+      ctx.bezierCurveTo(x - r, y - r * 0.4, x - r, y + r * 0.8, x, y + r);
+      ctx.bezierCurveTo(x + r, y + r * 0.8, x + r, y - r * 0.4, x, y + r * 0.3);
+      ctx.closePath();
+      ctx.fillStyle = '#ff5a5a';
+      ctx.shadowColor = '#f88';
+      ctx.shadowBlur = 8;
+        ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.font = 'bold 18px Arial';
+      ctx.fillStyle = '#fff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(value, x, y + r * 0.35);
+        ctx.restore();
+    }
+    function draw(now) {
       ctx.clearRect(0, 0, STAGE_WIDTH, STAGE_HEIGHT);
       player.heroes.forEach((hero, idx) => {
         drawHeroIcon(ctx, hero);
@@ -1143,86 +1311,153 @@
       bullets.forEach(bullet => {
         drawBullet(ctx, bullet);
       });
+      // 只在游戏开始后绘制敌人
+      if (gameStarted) {
       enemies.forEach(enemy => {
-        if (!enemy.visible && Date.now() < enemy.appearTime) return;
+          if (!enemy.visible) return;
+          ctx.save();
+          // 状态色优先
+          let mainColor = enemy.isBoss ? '#ff9800' : (enemy.type==='fast' ? '#00eaff' : (enemy.type==='tank' ? '#bfa76f' : '#3f3'));
+          // 速度型三角形（尖头向下）
+          if (!enemy.isBoss && enemy.type === 'fast') {
         ctx.save();
-        // 状态色优先
-        let mainColor = enemy.isBoss ? '#ff9800' : '#3f3';
-        let grad = ctx.createRadialGradient(enemy.position.x, enemy.position.y, enemy.radius*0.3, enemy.position.x, enemy.position.y, enemy.radius);
-        if (enemy.isBoss) {
-          grad.addColorStop(0, '#fff3b0');
-          grad.addColorStop(0.5, '#ffb347');
-          grad.addColorStop(1, '#ff9800');
-        } else {
-          grad.addColorStop(0, '#fff');
-          grad.addColorStop(0.5, '#7fff7f');
-          grad.addColorStop(1, '#3f3');
-        }
-        // 状态色覆盖
-        if (Date.now() < enemy.frozenUntil) grad = null, mainColor = '#b3e6ff';
-        else if (Date.now() < enemy.slowUntil) grad = null, mainColor = '#0ff';
-        else if (Date.now() < enemy.stunUntil) grad = null, mainColor = '#fff700';
-        // 主体
+            ctx.beginPath();
+            ctx.moveTo(enemy.position.x, enemy.position.y+enemy.radius); // 尖头向下
+            ctx.lineTo(enemy.position.x-enemy.radius, enemy.position.y-enemy.radius);
+            ctx.lineTo(enemy.position.x+enemy.radius, enemy.position.y-enemy.radius);
+            ctx.closePath();
+            ctx.fillStyle = mainColor;
+            ctx.shadowColor = mainColor;
+            ctx.shadowBlur = 8;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.restore();
+          } else if (!enemy.isBoss && enemy.type === 'tank') {
+            // 肉盾型盾牌（上方下尖）
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(enemy.position.x, enemy.position.y-enemy.radius); // 顶部
+            ctx.lineTo(enemy.position.x-enemy.radius, enemy.position.y+enemy.radius*0.5);
+            ctx.lineTo(enemy.position.x, enemy.position.y+enemy.radius);
+            ctx.lineTo(enemy.position.x+enemy.radius, enemy.position.y+enemy.radius*0.5);
+            ctx.closePath();
+            ctx.fillStyle = mainColor;
+            ctx.shadowColor = mainColor;
+            ctx.shadowBlur = 12;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.restore();
+          } else {
+            // 其他类型和boss
+            let grad = ctx.createRadialGradient(enemy.position.x, enemy.position.y, enemy.radius*0.3, enemy.position.x, enemy.position.y, enemy.radius);
+            if (enemy.isBoss) {
+              grad.addColorStop(0, '#fff3b0');
+              grad.addColorStop(0.5, '#ffb347');
+              grad.addColorStop(1, '#ff9800');
+            } else {
+              grad.addColorStop(0, '#fff');
+              grad.addColorStop(0.5, '#7fff7f');
+              grad.addColorStop(1, '#3f3');
+            }
+            // 状态色覆盖
+            if (Date.now() < enemy.frozenUntil) { grad = null; mainColor = '#b3e6ff'; }
+            else if (Date.now() < enemy.slowUntil) { grad = null; mainColor = '#0ff'; }
+            else if (Date.now() < enemy.stunUntil) { grad = null; mainColor = '#fff700'; }
         ctx.beginPath();
         ctx.arc(enemy.position.x, enemy.position.y, enemy.radius, 0, Math.PI*2);
-        ctx.closePath();
-        ctx.fillStyle = grad ? grad : mainColor;
-        ctx.shadowColor = grad ? (enemy.isBoss ? '#ff9800' : '#7fff7f') : mainColor;
-        ctx.shadowBlur = enemy.isBoss ? 18 : 8;
+            ctx.closePath();
+            ctx.fillStyle = grad ? grad : mainColor;
+            ctx.shadowColor = grad ? (enemy.isBoss ? '#ff9800' : '#7fff7f') : mainColor;
+            ctx.shadowBlur = enemy.isBoss ? 18 : 8;
         ctx.fill();
-        ctx.shadowBlur = 0;
-        // boss怒眉
-        if (enemy.isBoss && !grad) {
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+          }
+          // boss怒眉
+          if (enemy.isBoss && !grad) {
+            ctx.save();
+            ctx.strokeStyle = '#a85600';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(enemy.position.x-enemy.radius*0.5, enemy.position.y-enemy.radius*0.5);
+            ctx.lineTo(enemy.position.x-enemy.radius*0.1, enemy.position.y-enemy.radius*0.2);
+            ctx.moveTo(enemy.position.x+enemy.radius*0.5, enemy.position.y-enemy.radius*0.5);
+            ctx.lineTo(enemy.position.x+enemy.radius*0.1, enemy.position.y-enemy.radius*0.2);
+            ctx.stroke();
+            ctx.restore();
+          }
+          // 眼睛
           ctx.save();
-          ctx.strokeStyle = '#a85600';
-          ctx.lineWidth = 4;
+          ctx.fillStyle = '#222';
+          let eyeY = enemy.position.y - enemy.radius*0.2;
+          let eyeDX = enemy.radius*0.32;
           ctx.beginPath();
-          ctx.moveTo(enemy.position.x-enemy.radius*0.5, enemy.position.y-enemy.radius*0.5);
-          ctx.lineTo(enemy.position.x-enemy.radius*0.1, enemy.position.y-enemy.radius*0.2);
-          ctx.moveTo(enemy.position.x+enemy.radius*0.5, enemy.position.y-enemy.radius*0.5);
-          ctx.lineTo(enemy.position.x+enemy.radius*0.1, enemy.position.y-enemy.radius*0.2);
+          ctx.ellipse(enemy.position.x-eyeDX, eyeY, enemy.radius*0.16, enemy.radius*0.22, 0, 0, Math.PI*2);
+          ctx.ellipse(enemy.position.x+eyeDX, eyeY, enemy.radius*0.16, enemy.radius*0.22, 0, 0, Math.PI*2);
+          ctx.fill();
+          // boss怒眉
+          if (enemy.isBoss && grad) {
+            ctx.save();
+            ctx.strokeStyle = '#a85600';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(enemy.position.x-eyeDX, eyeY-enemy.radius*0.18);
+            ctx.lineTo(enemy.position.x-eyeDX*0.3, eyeY-enemy.radius*0.05);
+            ctx.moveTo(enemy.position.x+eyeDX, eyeY-enemy.radius*0.18);
+            ctx.lineTo(enemy.position.x+eyeDX*0.3, eyeY-enemy.radius*0.05);
+            ctx.stroke();
+            ctx.restore();
+          }
+          ctx.restore();
+          // 嘴巴
+          ctx.save();
+          ctx.strokeStyle = '#222';
+          ctx.lineWidth = enemy.isBoss ? 4 : 2;
+          ctx.beginPath();
+          if (enemy.isBoss) {
+            ctx.arc(enemy.position.x, enemy.position.y+enemy.radius*0.25, enemy.radius*0.32, Math.PI*0.1, Math.PI*0.9, false);
+          } else {
+            ctx.arc(enemy.position.x, enemy.position.y+enemy.radius*0.28, enemy.radius*0.18, Math.PI*0.15, Math.PI*0.85, false);
+          }
           ctx.stroke();
           ctx.restore();
-        }
-        // 眼睛
-        ctx.save();
-        ctx.fillStyle = '#222';
-        let eyeY = enemy.position.y - enemy.radius*0.2;
-        let eyeDX = enemy.radius*0.32;
-        ctx.beginPath();
-        ctx.ellipse(enemy.position.x-eyeDX, eyeY, enemy.radius*0.16, enemy.radius*0.22, 0, 0, Math.PI*2);
-        ctx.ellipse(enemy.position.x+eyeDX, eyeY, enemy.radius*0.16, enemy.radius*0.22, 0, 0, Math.PI*2);
-        ctx.fill();
-        // boss怒眉
-        if (enemy.isBoss && grad) {
-          ctx.save();
-          ctx.strokeStyle = '#a85600';
-          ctx.lineWidth = 4;
-          ctx.beginPath();
-          ctx.moveTo(enemy.position.x-eyeDX, eyeY-enemy.radius*0.18);
-          ctx.lineTo(enemy.position.x-eyeDX*0.3, eyeY-enemy.radius*0.05);
-          ctx.moveTo(enemy.position.x+eyeDX, eyeY-enemy.radius*0.18);
-          ctx.lineTo(enemy.position.x+eyeDX*0.3, eyeY-enemy.radius*0.05);
-          ctx.stroke();
-          ctx.restore();
-        }
-        ctx.restore();
-        // 嘴巴
-        ctx.save();
-        ctx.strokeStyle = '#222';
-        ctx.lineWidth = enemy.isBoss ? 4 : 2;
-        ctx.beginPath();
-        if (enemy.isBoss) {
-          ctx.arc(enemy.position.x, enemy.position.y+enemy.radius*0.25, enemy.radius*0.32, Math.PI*0.1, Math.PI*0.9, false);
-        } else {
-          ctx.arc(enemy.position.x, enemy.position.y+enemy.radius*0.28, enemy.radius*0.18, Math.PI*0.15, Math.PI*0.85, false);
-        }
-        ctx.stroke();
-        ctx.restore();
         ctx.fillStyle = '#f44';
         ctx.fillRect(enemy.position.x - 15, enemy.position.y - 28, 30 * (enemy.hp/enemy.maxHp), 4);
         ctx.restore();
-      });
+          // 速度型加小闪电，肉盾型加小盾牌
+          if (!enemy.isBoss) {
+            if (enemy.type === 'fast') {
+              ctx.save();
+              ctx.strokeStyle = '#00eaff';
+              ctx.lineWidth = 2;
+              ctx.beginPath();
+              ctx.moveTo(enemy.position.x-8, enemy.position.y-enemy.radius-6);
+              ctx.lineTo(enemy.position.x, enemy.position.y-enemy.radius+6);
+              ctx.lineTo(enemy.position.x+8, enemy.position.y-enemy.radius-6);
+              ctx.stroke();
+              ctx.restore();
+            } else if (enemy.type === 'tank') {
+              ctx.save();
+              ctx.strokeStyle = '#bfa76f';
+              ctx.lineWidth = 2;
+              ctx.beginPath();
+              ctx.arc(enemy.position.x, enemy.position.y-enemy.radius-6, 7, Math.PI, 0);
+              ctx.lineTo(enemy.position.x+7, enemy.position.y-enemy.radius-6);
+              ctx.lineTo(enemy.position.x-7, enemy.position.y-enemy.radius-6);
+              ctx.stroke();
+              ctx.restore();
+            }
+          }
+        });
+      }
       effects.forEach(eff => {
         if (eff.type === "laser") {
           const hero = eff.hero;
@@ -1247,7 +1482,15 @@
           ctx.restore();
         } else if (eff.type === "fire-flame") {
           if (eff.target && eff.target.alive) {
+            // 判断是否刚造成伤害（即lastBurnTick在200ms内）
+            let alpha = 0.5;
+            if (eff.target.lastBurnTick && now - eff.target.lastBurnTick < 200) {
+              alpha = 1;
+            }
+            ctx.save();
+            ctx.globalAlpha = alpha;
             drawFlame(ctx, eff.target.position.x, eff.target.position.y, 1.5);
+            ctx.restore();
           }
         } else if (eff.type === "ice-effect") {
           if (eff.target && eff.target.alive) {
@@ -1319,19 +1562,61 @@
       if (gameStarted) {
         ctx.save();
         ctx.font = '18px Arial';
-        ctx.fillStyle = '#fff';
-        const sec = Math.floor((Date.now() - gameStartTime) * speedMultiplier / 1000);
+      ctx.fillStyle = '#fff';
+        const sec = Math.floor((now - gameStartTime) / 1000);
         const min = Math.floor(sec/60);
         const s = sec%60;
         ctx.textAlign = 'left';
+        // 时间在左上
         ctx.fillText(`时间: ${min}:${s.toString().padStart(2,'0')}`, 20, 32);
-        ctx.font = '18px Arial';
-        ctx.fillStyle = '#ff5a5a';
+        // 爱心生命值
+        drawHeartIcon(ctx, STAGE_WIDTH/2, 38, 20, player.life);
+        // 波次和剩余敌人纵向排列，爱心右侧
+        ctx.font = '15px Arial';
+        ctx.fillStyle = '#fff';
         ctx.textAlign = 'left';
-        ctx.fillText(`生命值: ${player.life}`, 140, 32);
-        ctx.restore();
+        ctx.fillText(`波次：${waveManager.currentWave}/${waveManager.totalWaves}`, STAGE_WIDTH/2+30, 32);
+        ctx.fillText(`剩余敌人：${enemies.filter(e=>e.visible).length}`, STAGE_WIDTH/2+30, 52);
+      ctx.restore();
       }
-      info.innerHTML = `波次：${waveManager.currentWave}/${waveManager.totalWaves} &nbsp; 剩余敌人：${enemies.filter(e=>e.visible).length}`;
+      // 4. 删除画布最上方的波次和剩余敌人（info.innerHTML = ...）
+      info.innerHTML = '';
+      // 绘制暂停和2倍速按钮（右上角）
+      const btnY0 = 100;
+      const btnGap = 56;
+      // 暂停按钮
+      ctx.save();
+      ctx.globalAlpha = paused ? 0.7 : 1;
+      ctx.beginPath();
+      ctx.arc(STAGE_WIDTH-38, btnY0, 22, 0, Math.PI*2);
+      ctx.fillStyle = '#444';
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(STAGE_WIDTH-48, btnY0-12); ctx.lineTo(STAGE_WIDTH-48, btnY0+12);
+      ctx.moveTo(STAGE_WIDTH-28, btnY0-12); ctx.lineTo(STAGE_WIDTH-28, btnY0+12);
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 5;
+      ctx.stroke();
+      ctx.restore();
+      // 2倍速按钮
+      ctx.save();
+      ctx.globalAlpha = speedMultiplier === 2 ? 1 : 0.7;
+      ctx.beginPath();
+      ctx.arc(STAGE_WIDTH-38, btnY0+btnGap, 22, 0, Math.PI*2);
+      ctx.fillStyle = '#444';
+      ctx.fill();
+      ctx.strokeStyle = '#6cf';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.font = 'bold 18px Arial';
+      ctx.fillStyle = '#6cf';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('2x', STAGE_WIDTH-38, btnY0+btnGap);
+      ctx.restore();
     }
 
     gameLoop();
