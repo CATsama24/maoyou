@@ -100,8 +100,38 @@
   </style>
 </head>
 <body>
-  <div style="display:flex;justify-content:center;margin-top:24px;">
-    <button id="start-btn" style="display:block;padding:18px 40px;font-size:24px;background:#6cf;color:#222;border:none;border-radius:12px;cursor:pointer;">开始游戏</button>
+  <!-- 开始界面 -->
+  <div id="start-screen" style="position:fixed;left:0;top:0;width:100vw;height:100vh;background:radial-gradient(ellipse at 60% 40%, #23234a 0%, #181818 80%);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;animation:fadeIn 1.2s;">
+    <div style="position:absolute;left:0;top:0;width:100vw;height:100vh;pointer-events:none;z-index:0;">
+      <div style="position:absolute;left:10vw;top:20vh;width:120px;height:120px;background:radial-gradient(circle,#6cf8,transparent 70%);filter:blur(18px);opacity:0.5;"></div>
+      <div style="position:absolute;right:8vw;bottom:18vh;width:160px;height:160px;background:radial-gradient(circle,#ffe06688,transparent 70%);filter:blur(24px);opacity:0.4;"></div>
+      <div style="position:absolute;left:50vw;top:60vh;width:90px;height:90px;background:radial-gradient(circle,#ff6a0088,transparent 70%);filter:blur(16px);opacity:0.3;"></div>
+    </div>
+    <div style="font-size:2.8rem;font-weight:bold;background:linear-gradient(90deg,#6cf,#ffe066,#ff6a00,#00e0ff,#fff700,#6cf);background-size:200% 200%;background-clip:text;-webkit-background-clip:text;color:transparent;-webkit-text-fill-color:transparent;text-shadow:0 4px 32px #000a,0 1px 0 #fff3;letter-spacing:2px;margin-bottom:18px;animation:shineTitle 2.5s linear infinite alternate,fadeInUp 1s;z-index:1;">猫哥的战斗</div>
+    <div style="font-size:1.3rem;color:#fff;opacity:0.85;margin-bottom:38px;animation:fadeInUp 1.5s 0.3s both;z-index:1;">敬请期待各种哥</div>
+    <button id="start-btn" style="padding:18px 48px;font-size:24px;background:linear-gradient(90deg,#6cf,#ffe066,#6cf);background-size:200% 200%;color:#222;border:none;border-radius:32px;cursor:pointer;box-shadow:0 4px 24px #6cf6,0 1.5px 0 #fff3;transition:transform 0.12s,box-shadow 0.2s;background-position:0% 50%;z-index:1;animation:fadeInUp 1.2s 0.5s both;">开始游戏</button>
+    <style>
+      @keyframes shineTitle {
+        0% {background-position:0% 50%;}
+        100% {background-position:100% 50%;}
+      }
+      @keyframes fadeInUp {
+        0% {opacity:0;transform:translateY(40px);}
+        100% {opacity:1;transform:translateY(0);}
+      }
+      @keyframes fadeIn {
+        0% {opacity:0;}
+        100% {opacity:1;}
+      }
+      #start-btn:hover {
+        box-shadow:0 6px 32px #ffe066cc,0 1.5px 0 #fff3;
+        background-position:100% 50%;
+        transform:scale(1.06);
+      }
+      #start-btn:active {
+        transform:scale(0.97);
+      }
+    </style>
   </div>
   <div id="info"></div>
   <div id="life-bar" style="margin:0 auto 8px auto;max-width:400px;text-align:center;"></div>
@@ -124,6 +154,42 @@
       <div id="history-list"></div>
       <button id="close-history" style="margin-top:18px;padding:8px 24px;font-size:18px;background:#444;color:#fff;border:1px solid #6cf;border-radius:10px;cursor:pointer;">关闭</button>
     </div>
+  </div>
+  <!-- 游戏结束弹窗 -->
+  <div id="gameover-panel" style="display:none;position:fixed;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);z-index:200;align-items:center;justify-content:center;animation:fadeIn 0.7s;">
+    <div id="gameover-box" style="background:rgba(34,34,44,0.98);border:2.5px solid #6cf;border-radius:22px;padding:48px 32px 36px 32px;min-width:220px;max-width:90vw;max-height:80vh;overflow:auto;text-align:center;box-shadow:0 0 32px #000a,0 2px 0 #fff3;animation:fadeInUp 0.7s;">
+      <div id="gameover-title" style="font-size:2.2rem;margin-bottom:28px;font-weight:bold;text-shadow:0 2px 16px #000a,0 1px 0 #fff3;"></div>
+      <div id="gameover-btns"></div>
+    </div>
+    <style>
+      #gameover-title.win {
+        background:linear-gradient(90deg,#ffe066,#fff700,#fff3b0,#ffe066);
+        background-size:200% 200%;
+        background-clip:text;-webkit-background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
+        animation:shineTitle 2.5s linear infinite alternate;
+        text-shadow:0 2px 24px #ffe06655,0 1px 0 #fff3;
+      }
+      #gameover-title.fail {
+        color:#ff3b3b;
+        text-shadow:0 2px 24px #ff3b3b88,0 1px 0 #fff3;
+      }
+      #gameover-btns button {
+        padding:14px 44px;font-size:20px;margin:12px 12px 0 12px;
+        border:none;border-radius:32px;cursor:pointer;box-shadow:0 2px 16px #6cf6,0 1.5px 0 #fff3;
+        background:linear-gradient(90deg,#6cf,#ffe066,#6cf);background-size:200% 200%;color:#222;transition:transform 0.12s,box-shadow 0.2s;background-position:0% 50%;
+      }
+      #gameover-btns button:hover {
+        box-shadow:0 6px 32px #ffe066cc,0 1.5px 0 #fff3;
+        background-position:100% 50%;
+        transform:scale(1.06);
+      }
+      #gameover-btns button:active {
+        transform:scale(0.97);
+      }
+      #gameover-btns button:last-child {
+        background:linear-gradient(90deg,#444,#6cf,#444);color:#fff;
+      }
+    </style>
   </div>
   <script>
     // Safari 兼容 roundRect polyfill
@@ -493,10 +559,10 @@
           if (e2.alive && e2.visible && Math.sqrt((e2.position.x - target.position.x) ** 2 + (e2.position.y - target.position.y) ** 2) <= radius) {
             addDamageNumber(e2.position.x, e2.position.y-30, Math.round(dmg), "lightning", "");
             e2.takeDamage(dmg, "lightning", "");
-            if (this.lightningStun > 0) {
+            if (!e2.isBoss && this.lightningStun > 0) {
               e2.stunUntil = Math.max(e2.stunUntil || 0, Date.now() + 1000 * this.lightningStun);
             }
-            e2.paralyzeUntil = Date.now() + 3000;
+            if (!e2.isBoss) e2.paralyzeUntil = Date.now() + 3000;
           }
         });
       }
@@ -600,29 +666,33 @@
           this.visible = true;
         }
         let speed = this.speed * speedMultiplier;
-        if (Date.now() < this.slowUntil) speed *= 0.5;
-        if (Date.now() < this.stunUntil) speed = 0;
-        if (Date.now() < this.frozenUntil) speed = 0;
+        if (!this.isBoss) {
+          if (Date.now() < this.slowUntil) speed *= 0.5;
+          if (Date.now() < this.stunUntil) speed = 0;
+          if (Date.now() < this.frozenUntil) speed = 0;
+        }
         this.position.y += speed;
         if (this.position.y > STAGE_HEIGHT) this.alive = false;
         // 燃烧伤害
-        if (Date.now() < this.burnUntil) {
-          if (!this.lastBurnTick) this.lastBurnTick = Date.now();
-          while (this.lastBurnTick + 1000/speedMultiplier <= Date.now() && this.alive) {
-            this.lastBurnTick += 1000/speedMultiplier;
-            let dmg = Math.max(1, Math.round(this.burnDps));
-            this.hp -= dmg;
-            addDamageNumber(this.position.x, this.position.y-40, dmg, "fire", "");
+        if (!this.isBoss) {
+          if (Date.now() < this.burnUntil) {
+            if (!this.lastBurnTick) this.lastBurnTick = Date.now();
+            while (this.lastBurnTick + 1000/speedMultiplier <= Date.now() && this.alive) {
+              this.lastBurnTick += 1000/speedMultiplier;
+              let dmg = Math.max(1, Math.round(this.burnDps));
+              this.hp -= dmg;
+              addDamageNumber(this.position.x, this.position.y-40, dmg, "fire", "");
+            }
+          } else {
+            this.burnDps = 0;
+            this.lastBurnTick = 0;
           }
-        } else {
-          this.burnDps = 0;
-          this.lastBurnTick = 0;
         }
       }
       // 处理麻痹加伤
       takeDamage(amount, heroType, extraText, comboIdx=0) {
         let baseDmg = Math.max(1, Math.round(amount));
-        let isParalyze = Date.now() < this.paralyzeUntil;
+        let isParalyze = !this.isBoss && Date.now() < this.paralyzeUntil;
         let paralyzeDmg = 0;
         if (isParalyze) {
           paralyzeDmg = Math.max(1, Math.round(baseDmg * 0.2));
@@ -687,8 +757,8 @@
       spawnWave() {
         const enemies = [];
         const count = 5 + (this.currentWave - 1);
-        // 每4波增加基础值的10%
-        let baseHp = 6 * (1 + 0.1 * Math.floor((this.currentWave - 1) / 4));
+        // 每2波增加基础值1的0%，即血量不再随波次提升，只保留基础值
+        let baseHp = 6;
         const segments = Math.min(count, 8);
         const now = Date.now();
         const interval = 20000; // 20秒
@@ -940,10 +1010,13 @@
     let nextWaveTime = 0;
     let gameStarted = false;
     let gameStartTime = 0;
+    let gameOver = false;
+
     // 开始游戏按钮逻辑，currentWave初始化为0，点击后设为1并生成第一波
     const startBtn = document.getElementById('start-btn');
+    const startScreen = document.getElementById('start-screen');
     startBtn.onclick = function() {
-      startBtn.style.display = 'none';
+      startScreen.style.display = 'none';
       gameStarted = true;
       waveManager.currentWave = 0;
       player.updateExpThreshold();
@@ -990,7 +1063,7 @@
     function gameLoop() {
       requestAnimationFrame(gameLoop);
       let now;
-      if (paused || document.getElementById('upgrade-panel').style.display === 'flex') {
+      if (paused || document.getElementById('upgrade-panel').style.display === 'flex' || gameOver) {
         now = lastGameNow;
         draw(now);
         return;
@@ -1099,16 +1172,18 @@
                     // 找到火焰哥
                     const fireHero = player.heroes.find(h=>h.type==='fire');
                     if (fireHero) {
-                      e2.burnUntil = Date.now() + 3000;
-                      e2.burnDps = Math.max(1, fireHero.damage * (1 + fireHero.fireDamageBonus) * 0.1);
+                      if (!e2.isBoss) {
+                        e2.burnUntil = Date.now() + 3000;
+                        e2.burnDps = Math.max(1, fireHero.damage * (1 + fireHero.fireDamageBonus) * 0.1);
+                      }
                     }
                   }
                 });
                 bullet.active = false;
               } else if (bullet.type === "ice") {
                 enemy.takeDamage(bullet.damage, "ice");
-                enemy.slowUntil = Date.now() + 2000;
-                if (bullet.freeze) enemy.frozenUntil = Date.now() + 1000 * bullet.freeze;
+                if (!enemy.isBoss) enemy.slowUntil = Date.now() + 2000;
+                if (!enemy.isBoss && bullet.freeze) enemy.frozenUntil = Date.now() + 1000 * bullet.freeze;
                 effects.push({type: "ice-effect", target: enemy, start: Date.now(), duration: 400});
                 bullet.pierce--;
                 if (bullet.pierce <= 0) bullet.active = false;
@@ -1219,6 +1294,16 @@
       draw(now);
       effects = effects.filter(eff => Date.now() - eff.start < eff.duration);
       bullets = bullets.filter(b => b.active);
+      // 游戏胜利判定
+      if (waveManager.currentWave === waveManager.totalWaves && enemies.length === 0 && !gameOver) {
+        showGameOverPanel('win');
+        return;
+      }
+      // 游戏失败判定
+      if (player.life <= 0 && !gameOver) {
+        showGameOverPanel('fail');
+        return;
+      }
     }
 
     function drawFlame(ctx, x, y, scale=1) {
@@ -1989,6 +2074,57 @@
 
     // 在draw函数最后调用
     updateLifeBar();
+
+    // 游戏结束弹窗逻辑
+    const gameoverPanel = document.getElementById('gameover-panel');
+    const gameoverTitle = document.getElementById('gameover-title');
+    const gameoverBtns = document.getElementById('gameover-btns');
+    function showGameOverPanel(type) {
+      gameOver = true;
+      paused = true;
+      if (type === 'win') {
+        gameoverTitle.innerText = '恭喜通关';
+        gameoverTitle.className = 'win';
+        gameoverBtns.innerHTML = '<button id="go-back-btn">返回</button>';
+      } else {
+        gameoverTitle.innerText = '游戏失败';
+        gameoverTitle.className = 'fail';
+        gameoverBtns.innerHTML = '<button id="go-back-btn">返回</button>' +
+          '<button id="retry-btn">重试</button>';
+      }
+      gameoverPanel.style.display = 'flex';
+      // 按钮事件
+      document.getElementById('go-back-btn').onclick = function() {
+        gameoverPanel.style.display = 'none';
+        resetGameToStartScreen();
+      };
+      if (type === 'fail') {
+        document.getElementById('retry-btn').onclick = function() {
+          gameoverPanel.style.display = 'none';
+          restartGame();
+        };
+      }
+    }
+    // 返回到开始界面，重置所有状态
+    function resetGameToStartScreen() {
+      // 重置所有全局变量和状态
+      gameStarted = false;
+      gameOver = false;
+      paused = false;
+      // 重新创建 player、waveManager、enemies、bullets、effects
+      window.location.reload(); // 简单粗暴，刷新页面即可
+    }
+    // 重试，重新开始游戏
+    function restartGame() {
+      // 重置所有全局变量和状态
+      gameStarted = true;
+      gameOver = false;
+      paused = false;
+      // 重新创建 player、waveManager、enemies、bullets、effects
+      // 直接刷新页面并自动点击开始
+      window.location.reload();
+      // 更优雅的做法是重置所有对象并自动开始，但为保证状态彻底清理，这里直接刷新
+    }
   </script>
 </body>
 </html>
