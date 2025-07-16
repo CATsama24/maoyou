@@ -100,13 +100,17 @@
   </style>
 </head>
 <body>
-  <div id="version" style="position:fixed;left:8px;top:8px;z-index:100;font-size:14px;color:#aaa;user-select:none;pointer-events:none;">v1</div>
+  <div style="display:flex;justify-content:center;margin-top:24px;">
+    <button id="start-btn" style="display:block;padding:18px 40px;font-size:24px;background:#6cf;color:#222;border:none;border-radius:12px;cursor:pointer;">开始游戏</button>
+  </div>
   <div id="info"></div>
   <div id="life-bar" style="margin:0 auto 8px auto;max-width:400px;text-align:center;"></div>
   <button id="speed-btn" style="display:block;margin:12px auto 0 auto;padding:10px 28px;font-size:18px;background:#444;color:#fff;border:none;border-radius:10px;cursor:pointer;">2倍速</button>
   <button id="pause-btn" style="display:block;margin:12px auto 0 auto;padding:10px 28px;font-size:18px;background:#444;color:#fff;border:none;border-radius:10px;cursor:pointer;">暂停</button>
-  <button id="start-btn" style="display:block;margin:24px auto 0 auto;padding:18px 40px;font-size:24px;background:#6cf;color:#222;border:none;border-radius:12px;cursor:pointer;">开始游戏</button>
-  <canvas id="game" width="400" height="960"></canvas>
+  <div style="position:relative;max-width:480px;margin:0 auto;">
+    <span id="version" style="position:absolute;left:8px;top:8px;z-index:10;font-size:16px;color:#aaa;user-select:none;pointer-events:none;">v1</span>
+    <canvas id="game" width="400" height="960"></canvas>
+  </div>
   <div id="upgrade-panel">
     <div id="upgrade-box">
       <h2>请选择升级</h2>
