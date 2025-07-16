@@ -118,8 +118,46 @@
     </div>
   </div>
   <script>
+    // Safari 兼容 roundRect polyfill
+    if (!CanvasRenderingContext2D.prototype.roundRect) {
+      CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+        r = r || 0;
+        this.beginPath();
+        this.moveTo(x + r, y);
+        this.lineTo(x + w - r, y);
+        this.quadraticCurveTo(x + w, y, x + w, y + r);
+        this.lineTo(x + w, y + h - r);
+        this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        this.lineTo(x + r, y + h);
+        this.quadraticCurveTo(x, y + h, x, y + h - r);
+        this.lineTo(x, y + r);
+        this.quadraticCurveTo(x, y, x + r, y);
+        this.closePath();
+      }
+    }
+    // Safari 兼容 requestAnimationFrame
+    window.requestAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame;
+    // 画布高分屏适配，保证完整显示
+    function fixCanvasDpi(canvas) {
+      const dpr = window.devicePixelRatio || 1;
+      // 以父容器宽度为准，最大宽度 480px
+      const maxW = Math.min(window.innerWidth, 480);
+      // 高度按 400:960 比例
+      const ratio = 960 / 400;
+      const width = maxW;
+      const height = Math.round(width * ratio);
+      canvas.style.width = width + 'px';
+      canvas.style.height = height + 'px';
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
     // 修复：获取canvas、ctx、info
     const canvas = document.getElementById('game');
+    // 画布自适应，保证完整显示
+    fixCanvasDpi(canvas);
+    window.addEventListener('resize', () => fixCanvasDpi(canvas));
     const ctx = canvas.getContext('2d');
     const info = document.getElementById('info');
     // ================== 基础设置 ==================
@@ -752,6 +790,14 @@
       return (mx-cx)*(mx-cx)+(my-cy)*(my-cy) <= r*r;
     }
 
+    // 事件监听 passive 兼容
+    let supportsPassive = false;
+    try {
+      window.addEventListener("test", null, Object.defineProperty({}, 'passive', {
+        get: function() { supportsPassive = true; }
+      }));
+    } catch(e) {}
+
     // 修复：PC端click事件
     canvas.addEventListener('click', function(e) {
       const rect = canvas.getBoundingClientRect();
@@ -857,7 +903,7 @@
       });
       if (!found) selectedHeroIdx = null;
       e.preventDefault();
-    }, {passive: false});
+    }, supportsPassive ? {passive: false} : false);
 
     // ================== 游戏主循环 ==================
     const player = new Player();
@@ -1419,6 +1465,8 @@
       ctx.restore();
     }
     function draw(now) {
+      // 画布缩放适配，保证每帧都完整显示
+      fixCanvasDpi(canvas);
       ctx.clearRect(0, 0, STAGE_WIDTH, STAGE_HEIGHT);
       player.heroes.forEach((hero, idx) => {
         drawHeroIcon(ctx, hero);
