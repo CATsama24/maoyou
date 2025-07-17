@@ -302,13 +302,21 @@
       // 2. 再定义函数
       function fixCanvasDpi(canvas) {
         const dpr = window.devicePixelRatio || 1;
-        const mainH = document.getElementById('main-wrapper')?.offsetHeight || window.innerHeight;
+        // 获取主容器可用高度（减去顶部UI）
+        const mainH = window.innerHeight;
         const topUIH = document.getElementById('top-ui')?.offsetHeight || 0;
         const availH = mainH - topUIH;
-        let width = Math.min(window.innerWidth, 750);
-        let height = Math.round(width * 1624 / 750);
-        if (height > availH) {
-          height = availH;
+        // 计算最大可用宽高，保证内容完整
+        let width = window.innerWidth;
+        let height = availH;
+        // 以750x1624为基准，等比缩放
+        if (width / 750 < height / 1624) {
+          // 以宽为准
+          height = Math.round(width * 1624 / 750);
+          if (height > availH) height = availH;
+          width = Math.round(height * 750 / 1624);
+        } else {
+          // 以高为准
           width = Math.round(height * 750 / 1624);
         }
         canvas.style.width = width + 'px';
