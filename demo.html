@@ -288,7 +288,7 @@
       // 1. 先声明全局变量
       let STAGE_WIDTH = 750;
       let STAGE_HEIGHT = 1624;
-      let HERO_Y = STAGE_HEIGHT - 30;
+      let HERO_Y = STAGE_HEIGHT - 70; // 原为-30，向上移避免被经验条遮挡
       let STAGE_PLAY_HEIGHT = STAGE_HEIGHT;
       let STAGE_TOP_OFFSET = 0;
 
@@ -310,7 +310,7 @@
         canvas.height = height * dpr;
         STAGE_WIDTH = 750;
         STAGE_HEIGHT = 1624;
-        HERO_Y = STAGE_HEIGHT - 30;
+        HERO_Y = STAGE_HEIGHT - 70; // 原为-30，向上移避免被经验条遮挡
         STAGE_PLAY_HEIGHT = STAGE_HEIGHT;
         STAGE_TOP_OFFSET = 0;
       }
