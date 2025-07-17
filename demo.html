@@ -141,7 +141,7 @@
   </div>
   <div id="game-container" style="width:100vw;max-width:480px;margin:0 auto;position:relative;">
     <span id="version" style="position:absolute;left:8px;top:8px;z-index:10;font-size:16px;color:#aaa;user-select:none;pointer-events:none;">v1</span>
-    <canvas id="game" width="400" height="225" style="width:100vw;max-width:480px;height:auto;aspect-ratio:16/9;display:block;background:#222;border-radius:12px;"></canvas>
+    <canvas id="game" style="display:block;margin:0 auto;background:#222;border-radius:12px;width:100vw;max-width:480px;height:70vh;max-height:80vw;"></canvas>
   </div>
   <div id="upgrade-panel">
     <div id="upgrade-box">
@@ -224,8 +224,13 @@
     function fixCanvasDpi(canvas) {
       const dpr = window.devicePixelRatio || 1;
       const maxW = Math.min(window.innerWidth, 480);
-      const width = maxW;
-      const height = Math.round(width * 9 / 16);
+      const maxH = Math.round(window.innerHeight * 0.7);
+      let width = maxW;
+      let height = Math.round(width * 9 / 16);
+      if (height > maxH) {
+        height = maxH;
+        width = Math.round(height * 16 / 9);
+      }
       canvas.style.width = width + 'px';
       canvas.style.height = height + 'px';
       canvas.width = width * dpr;
@@ -234,11 +239,7 @@
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       // 同步全局舞台参数
       STAGE_WIDTH = 400;
-      STAGE_HEIGHT = 225;
-      // 画布缩放后，所有渲染和判定都按比例缩放
-      const scale = height / 225;
-      window.CANVAS_SCALE = scale;
-      // 英雄Y坐标、战场高度等同步
+      STAGE_HEIGHT = Math.round(400 * height / width); // 保证纵横比和逻辑坐标同步
       HERO_Y = STAGE_HEIGHT - 30;
       STAGE_PLAY_HEIGHT = STAGE_HEIGHT;
       STAGE_TOP_OFFSET = 0;
