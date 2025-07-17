@@ -728,19 +728,19 @@
           this.maxHp = hp;
           this.alive = true;
           this.type = enemyType;
-          // 固定速度，怪物速度加快1/3
+          // 敌人速度调整：非boss加快0.2，boss减慢0.3
           if (isBoss) {
-            this.speed = 0.3 * 2/3 * 4/3;
+            this.speed = 0.3 * 2/3 * 4/3 - 0.3;
           } else if (enemyType === 'fast') {
-            this.speed = 0.9 * 2/3 * 4/3;
+            this.speed = 0.9 * 2/3 * 4/3 + 0.2;
             this.hp = Math.round(hp * 2 / 3);
             this.maxHp = this.hp;
           } else if (enemyType === 'tank') {
-            this.speed = 0.3 * 2/3 * 4/3;
+            this.speed = 0.3 * 2/3 * 4/3 + 0.2;
             this.hp = Math.round(hp * 2);
             this.maxHp = this.hp;
           } else {
-            this.speed = 0.6 * 2/3 * 4/3;
+            this.speed = 0.6 * 2/3 * 4/3 + 0.2;
           }
           this.slowUntil = 0;
           this.stunUntil = 0;
@@ -897,17 +897,17 @@
         const options = [];
         const counts = player.upgradeCounts;
         const has = type => player.heroes.find(h => h.type === type);
-        if (!has('fire') && !counts['fire_spawn']) options.push({text: '火焰哥出场（范围、伤害）', key: 'fire_spawn'});
+        if (!has('fire') && !counts['fire_spawn']) options.push({text: '火焰哥出场<br/>(范围、伤害)', key: 'fire_spawn'});
         if (has('fire') && (counts['fire_damage']||0)<10) options.push({text: '火焰哥伤害增加60%', key: 'fire_damage'});
         if (has('fire') && (counts['fire_explosion']||0)<2) options.push({text: '火焰哥爆炸范围扩大50%', key: 'fire_explosion'});
-        if (!has('laser') && !counts['laser_spawn']) options.push({text: '激光哥出场（直线、伤害）', key: 'laser_spawn'});
+        if (!has('laser') && !counts['laser_spawn']) options.push({text: '激光哥出场<br/>(直线、伤害)', key: 'laser_spawn'});
         if (has('laser') && (counts['laser_damage']||0)<10) options.push({text: '激光哥伤害增加60%', key: 'laser_damage'});
         if (has('laser') && (counts['laser_duration']||0)<2) options.push({text: '激光哥持久输出', key: 'laser_duration'});
         if (has('laser') && (counts['laser_width']||0)<2) options.push({text: '激光哥光束变粗50%', key: 'laser_width'});
-        if (!has('lightning') && !counts['lightning_spawn']) options.push({text: '打雷哥出场（范围、增伤）', key: 'lightning_spawn'});
+        if (!has('lightning') && !counts['lightning_spawn']) options.push({text: '打雷哥出场<br/>(范围、增伤)', key: 'lightning_spawn'});
         if (has('lightning') && (counts['lightning_damage']||0)<10) options.push({text: '打雷哥伤害增加60%', key: 'lightning_damage'});
         if (has('lightning') && (counts['lightning_stun']||0)<2) options.push({text: '打雷哥附带晕眩', key: 'lightning_stun'});
-        if (!has('ice') && !counts['ice_spawn']) options.push({text: '寒冰哥出场（减速、穿透）', key: 'ice_spawn'});
+        if (!has('ice') && !counts['ice_spawn']) options.push({text: '寒冰哥出场<br/>(减速、穿透)', key: 'ice_spawn'});
         if (has('ice') && (counts['ice_damage']||0)<10) options.push({text: '寒冰哥伤害增加60%', key: 'ice_damage'});
         if (has('ice') && (counts['ice_freeze']||0)<2) options.push({text: '寒冰哥附带冻结', key: 'ice_freeze'});
         if ((counts['archer_bullet']||0)<2) options.push({text: '射手哥子弹+1', key: 'archer_bullet'});
@@ -929,10 +929,21 @@
           title.innerText = '请选择升级';
         }
         const options = getUpgradeOptions(player);
+        // 替换英雄名称为icon
+        function replaceHeroNameWithIcon(text) {
+          return text
+            .replace(/射手哥/g, HERO_ICONS.archer + ' ')
+            .replace(/火焰哥/g, HERO_ICONS.fire + ' ')
+            .replace(/激光哥/g, HERO_ICONS.laser + ' ')
+            .replace(/寒冰哥/g, HERO_ICONS.ice + ' ')
+            .replace(/打雷哥/g, HERO_ICONS.lightning + ' ');
+        }
         options.forEach(opt => {
           const btn = document.createElement('button');
           btn.className = 'upgrade-btn';
-          btn.innerText = opt.text;
+          btn.innerHTML = replaceHeroNameWithIcon(opt.text); // 用icon+文本
+          btn.style.whiteSpace = 'normal';
+          btn.style.lineHeight = '1.4';
           btn.onclick = () => {
             panel.style.display = 'none';
             player.upgradeCounts[opt.key] = (player.upgradeCounts[opt.key]||0)+1;
@@ -1019,22 +1030,18 @@
         handleButtonEventCoreLogic(x, y, e);
       }, supportsPassive ? {passive: false} : false);
       function handleButtonEventCoreLogic(mx, my, e) {
+        console.log('handleButtonEventCoreLogic 触发，mx=', mx, 'my=', my);
         const { pause, speed, history } = getButtonCentersLogic();
-        console.log('[按钮调试] 逻辑坐标:', mx, my);
-        console.log('[按钮调试] 暂停按钮:', pause.x, pause.y, '判定:', inCircle(mx, my, pause.x, pause.y, pause.r));
-        console.log('[按钮调试] 2x按钮:', speed.x, speed.y, '判定:', inCircle(mx, my, speed.x, speed.y, speed.r));
-        console.log('[按钮调试] 历史按钮:', history.x, history.y, '判定:', inCircle(mx, my, history.x, history.y, history.r));
         if (inCircle(mx, my, pause.x, pause.y, pause.r)) {
-          console.log('[按钮调试] 命中暂停按钮');
-          paused = !paused;
-          if (!paused) {
-            // 恢复时只启动一次主循环
+          console.log('进入暂停按钮判定分支');
+          window.paused = !window.paused;
+          console.log('暂停按钮点击后，window.paused=' + window.paused);
+          if (!window.paused) {
             if (!gameLoopRunning) {
               gameLoopRunning = true;
               gameLoopReqId = requestAnimationFrame(gameLoop);
             }
           } else {
-            // 暂停时停止主循环
             gameLoopRunning = false;
             if (gameLoopReqId) {
               cancelAnimationFrame(gameLoopReqId);
@@ -1135,20 +1142,18 @@
       }
       // 2倍速控制
       let speedMultiplier = 1;
-      // 暂停功能
-      let paused = false;
+      // 暂停功能（全局唯一，绑定到window）
+      window.paused = false;
       let lastGameNow = Date.now();
-      // 新增：主循环运行标志，防止多重循环
       let gameLoopRunning = false;
       let gameLoopReqId = null;
       function gameLoop() {
         if (!gameLoopRunning) return;
         gameLoopReqId = requestAnimationFrame(gameLoop);
         let now;
-        if (paused || document.getElementById('upgrade-panel').style.display === 'flex' || gameOver) {
+        if (window.paused || document.getElementById('upgrade-panel').style.display === 'flex' || gameOver) {
           now = lastGameNow;
           draw(now); // 依然持续刷新UI
-          // 不return，继续下一帧
           return;
         } else {
           now = Date.now();
@@ -1721,6 +1726,7 @@
         ctx.restore();
       }
       function draw(now) {
+        console.log('draw时window.paused=' + window.paused);
         fixCanvasDpi(canvas);
         ctx.clearRect(0, 0, 750, 1624);
         player.heroes.forEach((hero, idx) => {
@@ -2146,7 +2152,8 @@
         ctx.stroke();
         ctx.save();
         ctx.translate(pause.x, pause.y);
-        if (paused) {
+        console.log('暂停按钮绘制，paused=' + window.paused);
+        if (window.paused) {
           // 暂停时显示"播放"三角形
           ctx.beginPath();
           ctx.moveTo(-7, -12);
@@ -2243,7 +2250,7 @@
       const gameoverBtns = document.getElementById('gameover-btns');
       function showGameOverPanel(type) {
         gameOver = true;
-        paused = true;
+        window.paused = true;
         if (type === 'win') {
           gameoverTitle.innerText = '恭喜通关';
           gameoverTitle.className = 'win';
@@ -2272,7 +2279,7 @@
         // 重置所有全局变量和状态
         gameStarted = false;
         gameOver = false;
-        paused = false;
+        window.paused = false;
         // 重新创建 player、waveManager、enemies、bullets、effects
         window.location.reload(); // 简单粗暴，刷新页面即可
       }
@@ -2281,7 +2288,7 @@
         // 重置所有全局变量和状态
         gameStarted = true;
         gameOver = false;
-        paused = false;
+        window.paused = false;
         // 重新创建 player、waveManager、enemies、bullets、effects
         // 直接刷新页面并自动点击开始
         window.location.reload();
