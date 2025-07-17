@@ -205,7 +205,6 @@
     </div>
     <div id="top-ui">
       <div id="info" style="margin-top:8px;"></div>
-      <div id="life-bar" style="margin:0 auto 8px auto;max-width:400px;text-align:center;"></div>
       <div id="top-control-bar" style="display:flex;justify-content:center;align-items:center;gap:16px;margin:10px auto 0 auto;max-width:480px;">
         <button id="history-btn" style="flex:1 1 0;padding:10px 0;font-size:17px;background:#444;color:#fff;border:none;border-radius:10px;cursor:pointer;min-width:90px;margin:0;">升级历史</button>
         <button id="speed-btn" style="flex:1 1 0;padding:10px 0;font-size:17px;background:#444;color:#fff;border:none;border-radius:10px;cursor:pointer;min-width:90px;margin:0;">2倍速</button>
@@ -2127,27 +2126,7 @@
         historyPanel.style.display = 'none';
       };
 
-      function updateLifeBar() {
-        const bar = document.getElementById('life-bar');
-        let html = '';
-        const life = player.life;
-        const maxLife = 10;
-        for(let i=0;i<life;i++) {
-          html += `<span style="display:inline-block;width:28px;height:28px;margin:0 2px;vertical-align:middle;">
-            <svg width="28" height="28" viewBox="0 0 28 28"><path d="M14 24 Q4 16 7 10 Q10 4 14 8 Q18 4 21 10 Q24 16 14 24 Z" fill="#ff5a5a" stroke="#fff" stroke-width="2"/></svg>
-          </span>`;
-        }
-        for(let i=life;i<maxLife;i++) {
-          html += `<span style="display:inline-block;width:28px;height:28px;margin:0 2px;vertical-align:middle;opacity:0.25;">
-            <svg width="28" height="28" viewBox="0 0 28 28"><path d="M14 24 Q4 16 7 10 Q10 4 14 8 Q18 4 21 10 Q24 16 14 24 Z" fill="#ff5a5a" stroke="#fff" stroke-width="2"/></svg>
-          </span>`;
-        }
-        html += `<span style="font-size:20px;color:#fff;margin-left:8px;vertical-align:middle;">${life} / ${maxLife}</span>`;
-        bar.innerHTML = html;
-      }
-
-      // 在draw函数最后调用
-      updateLifeBar();
+      // 删除updateLifeBar函数，因为已移除生命值血条
 
       // 游戏结束弹窗逻辑
       const gameoverPanel = document.getElementById('gameover-panel');
