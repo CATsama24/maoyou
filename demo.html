@@ -168,8 +168,8 @@
     }
   </style>
 </head>
-<body>
-  <div id="main-wrapper" style="display:flex;flex-direction:column;height:100vh;min-height:100vh;max-height:100vh;overflow:hidden;">
+<body style="margin:0;padding:0;overflow:hidden;height:100vh;width:100vw;">
+  <div id="main-wrapper" style="position:fixed;left:0;top:0;width:100vw;height:100vh;overflow:hidden;display:flex;flex-direction:column;">
     <!-- 开始界面 -->
     <div id="start-screen" style="position:fixed;left:0;top:0;width:100vw;height:100vh;background:radial-gradient(ellipse at 60% 40%, #23234a 0%, #181818 80%);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;animation:fadeIn 1.2s;">
       <div style="position:absolute;left:0;top:0;width:100vw;height:100vh;pointer-events:none;z-index:0;">
@@ -207,8 +207,8 @@
       <div id="info" style="margin-top:8px;"></div>
       <!-- 顶部按钮已去除，只保留信息栏 -->
     </div>
-    <div id="game-container" style="flex:1 1 0;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0;width:100vw;max-width:750px;margin:0 auto;position:relative;height:100%;">
-      <canvas id="game"></canvas>
+    <div id="game-container" style="position:relative;flex:1 1 0;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0;width:100vw;max-width:750px;margin:0 auto;">
+      <canvas id="game" style="display:block;position:absolute;left:0;top:0;width:100%;height:100%;"></canvas>
     </div>
     <div id="upgrade-panel">
       <div id="upgrade-box">
@@ -303,7 +303,8 @@
       function fixCanvasDpi(canvas) {
         const dpr = window.devicePixelRatio || 1;
         const topUIH = document.getElementById('top-ui')?.offsetHeight || 0;
-        const availH = window.innerHeight - topUIH;
+        const bottomSafe = 20; // 适配iOS底部工具栏
+        const availH = window.innerHeight - topUIH - bottomSafe;
         let width = window.innerWidth;
         let height = availH;
         if (width / 750 < height / 1624) {
