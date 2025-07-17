@@ -2186,11 +2186,11 @@
         ctx.strokeStyle = '#6cf';
         ctx.lineWidth = 2;
         ctx.stroke();
-        ctx.font = 'bold 16px Arial';
+        ctx.font = 'bold 18px Arial';
         ctx.fillStyle = '#6cf';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('H', STAGE_WIDTH-38, btnY0+btnGap*2);
+        ctx.fillText('历', STAGE_WIDTH-38, btnY0+btnGap*2);
         ctx.restore();
         // 暂停按钮
         ctx.save();
@@ -2296,6 +2296,68 @@
         // 直接刷新页面并自动点击开始
         window.location.reload();
         // 更优雅的做法是重置所有对象并自动开始，但为保证状态彻底清理，这里直接刷新
+      }
+
+      // 修复touch事件，touchend时也触发同样的逻辑，防止部分机型touchstart被吞掉
+      canvas.addEventListener('touchstart', handleTouch, supportsPassive ? {passive: false} : false);
+      canvas.addEventListener('touchend', handleTouch, supportsPassive ? {passive: false} : false);
+      function handleTouch(e) {
+        const {mx, my} = getCanvasLogicPos(e, canvas);
+        if (inCircle(mx, my, iconPause.x, iconPause.y, iconPause.r)) {
+          paused = !paused;
+          requestAnimationFrame(gameLoop);
+          e.preventDefault();
+          return;
+        }
+        if (inCircle(mx, my, iconSpeed.x, iconSpeed.y, iconSpeed.r)) {
+          speedMultiplier = speedMultiplier === 1 ? 2 : 1;
+          e.preventDefault();
+          return;
+        }
+        if (inCircle(mx, my, iconHistory.x, iconHistory.y, iconHistory.r)) {
+          const counts = {};
+          player.upgradeHistory.forEach(item => {
+            if (!counts[item.text]) counts[item.text] = 0;
+            counts[item.text]++;
+          });
+          let html = '';
+          if (player.upgradeHistory.length === 0) {
+            html = '<div style="color:#aaa;">暂无升级记录</div>';
+          } else {
+            html = '<ul style="padding-left:1.2em;">';
+            Object.keys(counts).forEach(text => {
+              html += `<li><b>${text}</b> <span style=\"color:#6cf;\">x${counts[text]}</span></li>`;
+            });
+            html += '</ul>';
+            html += '<hr style="border:1px solid #333;">';
+            html += '<div style="font-size:13px;color:#aaa;">详细记录：</div>';
+            html += '<ol style="padding-left:1.2em;">';
+            player.upgradeHistory.forEach(item => {
+              html += `<li>${item.time} - ${item.text}</li>`;
+            });
+            html += '</ol>';
+          }
+          historyList.innerHTML = html;
+          historyPanel.style.display = 'flex';
+          e.preventDefault();
+          return;
+        }
+        // 英雄选中逻辑
+        let found = false;
+        player.heroes.forEach((hero, idx) => {
+          const dx = mx - hero.position.x;
+          const dy = my - hero.position.y;
+          if (dx*dx + dy*dy <= 22*22) {
+            if (selectedHeroIdx === idx) {
+              selectedHeroIdx = null;
+            } else {
+              selectedHeroIdx = idx;
+            }
+            found = true;
+          }
+        });
+        if (!found) selectedHeroIdx = null;
+        e.preventDefault();
       }
     </script>
   </div>
