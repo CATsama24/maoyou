@@ -169,1123 +169,1140 @@
   </style>
 </head>
 <body>
-  <!-- 开始界面 -->
-  <div id="start-screen" style="position:fixed;left:0;top:0;width:100vw;height:100vh;background:radial-gradient(ellipse at 60% 40%, #23234a 0%, #181818 80%);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;animation:fadeIn 1.2s;">
-    <div style="position:absolute;left:0;top:0;width:100vw;height:100vh;pointer-events:none;z-index:0;">
-      <div style="position:absolute;left:10vw;top:20vh;width:120px;height:120px;background:radial-gradient(circle,#6cf8,transparent 70%);filter:blur(18px);opacity:0.5;"></div>
-      <div style="position:absolute;right:8vw;bottom:18vh;width:160px;height:160px;background:radial-gradient(circle,#ffe06688,transparent 70%);filter:blur(24px);opacity:0.4;"></div>
-      <div style="position:absolute;left:50vw;top:60vh;width:90px;height:90px;background:radial-gradient(circle,#ff6a0088,transparent 70%);filter:blur(16px);opacity:0.3;"></div>
-    </div>
-    <div style="font-size:2.8rem;font-weight:bold;background:linear-gradient(90deg,#6cf,#ffe066,#ff6a00,#00e0ff,#fff700,#6cf);background-size:200% 200%;background-clip:text;-webkit-background-clip:text;color:transparent;-webkit-text-fill-color:transparent;text-shadow:0 4px 32px #000a,0 1px 0 #fff3;letter-spacing:2px;margin-bottom:18px;animation:shineTitle 2.5s linear infinite alternate,fadeInUp 1s;z-index:1;">猫哥的战斗</div>
-    <div style="font-size:1.3rem;color:#fff;opacity:0.85;margin-bottom:38px;animation:fadeInUp 1.5s 0.3s both;z-index:1;">敬请期待各种哥</div>
-    <button id="start-btn" style="padding:18px 48px;font-size:24px;background:linear-gradient(90deg,#6cf,#ffe066,#6cf);background-size:200% 200%;color:#222;border:none;border-radius:32px;cursor:pointer;box-shadow:0 4px 24px #6cf6,0 1.5px 0 #fff3;transition:transform 0.12s,box-shadow 0.2s;background-position:0% 50%;z-index:1;animation:fadeInUp 1.2s 0.5s both;">开始游戏</button>
-    <style>
-      @keyframes shineTitle {
-        0% {background-position:0% 50%;}
-        100% {background-position:100% 50%;}
-      }
-      @keyframes fadeInUp {
-        0% {opacity:0;transform:translateY(40px);}
-        100% {opacity:1;transform:translateY(0);}
-      }
-      @keyframes fadeIn {
-        0% {opacity:0;}
-        100% {opacity:1;}
-      }
-      #start-btn:hover {
-        box-shadow:0 6px 32px #ffe066cc,0 1.5px 0 #fff3;
-        background-position:100% 50%;
-        transform:scale(1.06);
-      }
-      #start-btn:active {
-        transform:scale(0.97);
-      }
-    </style>
-  </div>
-  <div id="info" style="margin-top:8px;"></div>
-  <div id="life-bar" style="margin:0 auto 8px auto;max-width:400px;text-align:center;"></div>
-  <div id="control-bar" style="display:flex;justify-content:center;align-items:center;gap:16px;margin:10px auto 0 auto;max-width:400px;">
-    <button id="speed-btn" style="flex:1 1 0;padding:10px 0;font-size:17px;background:#444;color:#fff;border:none;border-radius:10px;cursor:pointer;min-width:90px;">2倍速</button>
-    <button id="pause-btn" style="flex:1 1 0;padding:10px 0;font-size:17px;background:#444;color:#fff;border:none;border-radius:10px;cursor:pointer;min-width:90px;">暂停</button>
-  </div>
-  <div id="game-container" style="width:100vw;max-width:480px;margin:0 auto;position:relative;">
-    <span id="version" style="position:absolute;left:8px;top:8px;z-index:10;font-size:16px;color:#aaa;user-select:none;pointer-events:none;">v1</span>
-    <canvas id="game"></canvas>
-  </div>
-  <div id="upgrade-panel">
-    <div id="upgrade-box">
-      <h2>请选择升级</h2>
-      <div id="upgrade-options"></div>
-    </div>
-  </div>
-  <button id="history-btn" style="display:block;margin:12px auto 0 auto;padding:10px 28px;font-size:18px;background:#444;color:#fff;border:none;border-radius:10px;cursor:pointer;">升级历史</button>
-  <div id="history-panel" style="display:none;position:fixed;left:0;right:0;top:0;bottom:0;background:rgba(0,0,0,0.7);z-index:20;align-items:center;justify-content:center;">
-    <div style="background:#222;border:2px solid #6cf;border-radius:12px;padding:32px 24px;min-width:220px;max-width:90vw;max-height:80vh;overflow:auto;text-align:left;box-shadow:0 0 24px #000;">
-      <h2 style="color:#6cf;margin-bottom:18px;font-size:22px;">升级历史</h2>
-      <div id="history-list"></div>
-      <button id="close-history" style="margin-top:18px;padding:8px 24px;font-size:18px;background:#444;color:#fff;border:1px solid #6cf;border-radius:10px;cursor:pointer;">关闭</button>
-    </div>
-  </div>
-  <!-- 游戏结束弹窗 -->
-  <div id="gameover-panel" style="display:none;position:fixed;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);z-index:200;align-items:center;justify-content:center;animation:fadeIn 0.7s;">
-    <div id="gameover-box" style="background:rgba(34,34,44,0.98);border:2.5px solid #6cf;border-radius:22px;padding:48px 32px 36px 32px;min-width:220px;max-width:90vw;max-height:80vh;overflow:auto;text-align:center;box-shadow:0 0 32px #000a,0 2px 0 #fff3;animation:fadeInUp 0.7s;">
-      <div id="gameover-title" style="font-size:2.2rem;margin-bottom:28px;font-weight:bold;text-shadow:0 2px 16px #000a,0 1px 0 #fff3;"></div>
-      <div id="gameover-btns"></div>
-    </div>
-    <style>
-      #gameover-title.win {
-        background:linear-gradient(90deg,#ffe066,#fff700,#fff3b0,#ffe066);
-        background-size:200% 200%;
-        background-clip:text;-webkit-background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
-        animation:shineTitle 2.5s linear infinite alternate;
-        text-shadow:0 2px 24px #ffe06655,0 1px 0 #fff3;
-      }
-      #gameover-title.fail {
-        color:#ff3b3b;
-        text-shadow:0 2px 24px #ff3b3b88,0 1px 0 #fff3;
-      }
-      #gameover-btns button {
-        padding:14px 44px;font-size:20px;margin:12px 12px 0 12px;
-        border:none;border-radius:32px;cursor:pointer;box-shadow:0 2px 16px #6cf6,0 1.5px 0 #fff3;
-        background:linear-gradient(90deg,#6cf,#ffe066,#6cf);background-size:200% 200%;color:#222;transition:transform 0.12s,box-shadow 0.2s;background-position:0% 50%;
-      }
-      #gameover-btns button:hover {
-        box-shadow:0 6px 32px #ffe066cc,0 1.5px 0 #fff3;
-        background-position:100% 50%;
-        transform:scale(1.06);
-      }
-      #gameover-btns button:active {
-        transform:scale(0.97);
-      }
-      #gameover-btns button:last-child {
-        background:linear-gradient(90deg,#444,#6cf,#444);color:#fff;
-      }
-    </style>
-  </div>
-  <script>
-    // Safari 兼容 roundRect polyfill
-    if (!CanvasRenderingContext2D.prototype.roundRect) {
-      CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
-        r = r || 0;
-        this.beginPath();
-        this.moveTo(x + r, y);
-        this.lineTo(x + w - r, y);
-        this.quadraticCurveTo(x + w, y, x + w, y + r);
-        this.lineTo(x + w, y + h - r);
-        this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-        this.lineTo(x + r, y + h);
-        this.quadraticCurveTo(x, y + h, x, y + h - r);
-        this.lineTo(x, y + r);
-        this.quadraticCurveTo(x, y, x + r, y);
-        this.closePath();
-      }
-    }
-    // Safari 兼容 requestAnimationFrame
-    window.requestAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame;
-    // 1. 先声明全局变量
-    let STAGE_WIDTH = 750;
-    let STAGE_HEIGHT = 1624;
-    let HERO_Y = STAGE_HEIGHT - 30;
-    let STAGE_PLAY_HEIGHT = STAGE_HEIGHT;
-    let STAGE_TOP_OFFSET = 0;
-
-    // 2. 再定义函数
-    function fixCanvasDpi(canvas) {
-      const dpr = window.devicePixelRatio || 1;
-      // 计算顶部UI高度
-      const infoH = document.getElementById('info')?.offsetHeight || 0;
-      const lifeBarH = document.getElementById('life-bar')?.offsetHeight || 0;
-      const controlBarH = document.getElementById('control-bar')?.offsetHeight || 0;
-      const topUIH = infoH + lifeBarH + controlBarH + 32; // 额外间距
-      // 可用高度
-      const availH = window.innerHeight - topUIH - 16;
-      let width = Math.min(window.innerWidth, 750);
-      let height = Math.round(width * 1624 / 750);
-      if (height > availH) {
-        height = availH;
-        width = Math.round(height * 750 / 1624);
-      }
-      canvas.style.width = width + 'px';
-      canvas.style.height = height + 'px';
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
-      STAGE_WIDTH = 750;
-      STAGE_HEIGHT = 1624;
-      HERO_Y = STAGE_HEIGHT - 30;
-      STAGE_PLAY_HEIGHT = STAGE_HEIGHT;
-      STAGE_TOP_OFFSET = 0;
-    }
-
-    // 3. 再获取DOM和调用
-    const canvas = document.getElementById('game');
-    fixCanvasDpi(canvas);
-    window.addEventListener('resize', () => fixCanvasDpi(canvas));
-    const ctx = canvas.getContext('2d');
-    const info = document.getElementById('info');
-    // ================== 基础设置 ==================
-    const HERO_MAX = 5;
-    const HERO_MARGIN = 70;
-
-    // 英雄配置
-    const HERO_CONFIGS = [
-      {
-        name: "射手哥",
-        type: "archer",
-        range: 0.75,
-        skill: "arrow",
-        color: "#6cf"
-      },
-      {
-        name: "激光哥",
-        type: "laser",
-        range: 1,
-        skill: "laser",
-        color: "#ffe066"
-      },
-      {
-        name: "火焰哥",
-        type: "fire",
-        range: 0.5,
-        skill: "fireball",
-        color: "#ff6a00"
-      },
-      {
-        name: "寒冰哥",
-        type: "ice",
-        range: 2/3,
-        skill: "ice",
-        color: "#00e0ff"
-      },
-      {
-        name: "打雷哥",
-        type: "lightning",
-        range: 0.5,
-        skill: "lightning",
-        color: "#fff700"
-      }
-    ];
-
-    // ================== 工具函数 ==================
-    function shuffle(arr) {
-      return arr.map(v => [Math.random(), v])
-                .sort((a, b) => a[0] - b[0])
-                .map(v => v[1]);
-    }
-    function getHeroPositions(count) {
-      const totalWidth = (count - 1) * HERO_MARGIN;
-      const startX = STAGE_WIDTH / 2 - totalWidth / 2;
-      return Array.from({length: count}, (_, i) => startX + i * HERO_MARGIN);
-    }
-    function distance(a, b) {
-      const dx = a.x - b.x, dy = a.y - b.y;
-      return Math.sqrt(dx*dx + dy*dy);
-    }
-
-    // ================== 伤害数字 ==================
-    let damageNumbers = [];
-    function addDamageNumber(x, y, value, heroType, extra) {
-      damageNumbers.push({x, y, value, heroType, alpha: 1, vy: -1, time: 0, extra: extra||''});
-    }
-    function drawDamageNumbers(ctx) {
-      damageNumbers.forEach(dmg => {
-        ctx.save();
-        // 颜色映射
-        let color = '#fff';
-        let stroke = '#222';
-        switch(dmg.heroType) {
-          case 'archer': color = '#fff'; stroke = '#222'; break;
-          case 'ice': color = '#00e0ff'; stroke = '#005577'; break;
-          case 'fire': color = '#ff3b3b'; stroke = '#a80000'; break;
-          case 'lightning': color = '#ffe066'; stroke = '#bba800'; break;
-          case 'laser': color = '#b266ff'; stroke = '#4b0066'; break;
+  <div id="main-wrapper" style="display:flex;flex-direction:column;height:100vh;min-height:100vh;max-height:100vh;overflow:hidden;">
+    <!-- 开始界面 -->
+    <div id="start-screen" style="position:fixed;left:0;top:0;width:100vw;height:100vh;background:radial-gradient(ellipse at 60% 40%, #23234a 0%, #181818 80%);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;animation:fadeIn 1.2s;">
+      <div style="position:absolute;left:0;top:0;width:100vw;height:100vh;pointer-events:none;z-index:0;">
+        <div style="position:absolute;left:10vw;top:20vh;width:120px;height:120px;background:radial-gradient(circle,#6cf8,transparent 70%);filter:blur(18px);opacity:0.5;"></div>
+        <div style="position:absolute;right:8vw;bottom:18vh;width:160px;height:160px;background:radial-gradient(circle,#ffe06688,transparent 70%);filter:blur(24px);opacity:0.4;"></div>
+        <div style="position:absolute;left:50vw;top:60vh;width:90px;height:90px;background:radial-gradient(circle,#ff6a0088,transparent 70%);filter:blur(16px);opacity:0.3;"></div>
+      </div>
+      <div style="font-size:2.8rem;font-weight:bold;background:linear-gradient(90deg,#6cf,#ffe066,#ff6a00,#00e0ff,#fff700,#6cf);background-size:200% 200%;background-clip:text;-webkit-background-clip:text;color:transparent;-webkit-text-fill-color:transparent;text-shadow:0 4px 32px #000a,0 1px 0 #fff3;letter-spacing:2px;margin-bottom:18px;animation:shineTitle 2.5s linear infinite alternate,fadeInUp 1s;z-index:1;">猫哥的战斗</div>
+      <div style="font-size:1.3rem;color:#fff;opacity:0.85;margin-bottom:38px;animation:fadeInUp 1.5s 0.3s both;z-index:1;">敬请期待各种哥</div>
+      <button id="start-btn" style="padding:18px 48px;font-size:24px;background:linear-gradient(90deg,#6cf,#ffe066,#6cf);background-size:200% 200%;color:#222;border:none;border-radius:32px;cursor:pointer;box-shadow:0 4px 24px #6cf6,0 1.5px 0 #fff3;transition:transform 0.12s,box-shadow 0.2s;background-position:0% 50%;z-index:1;animation:fadeInUp 1.2s 0.5s both;">开始游戏</button>
+      <style>
+        @keyframes shineTitle {
+          0% {background-position:0% 50%;}
+          100% {background-position:100% 50%;}
         }
-        ctx.globalAlpha = dmg.alpha;
-        if (dmg.small) {
-          ctx.font = '14px Arial';
-          ctx.fillStyle = color;
-          ctx.textAlign = 'center';
-          ctx.fillText(dmg.small, dmg.x, dmg.y+18);
-        } else {
-          ctx.font = 'bold 22px Arial';
-          ctx.lineWidth = 3;
-          ctx.strokeStyle = stroke;
-          ctx.strokeText(dmg.value + (dmg.extra||''), dmg.x, dmg.y);
-          ctx.fillStyle = color;
-          ctx.fillText(dmg.value + (dmg.extra||''), dmg.x, dmg.y);
+        @keyframes fadeInUp {
+          0% {opacity:0;transform:translateY(40px);}
+          100% {opacity:1;transform:translateY(0);}
         }
-        ctx.restore();
-        dmg.y += dmg.vy;
-        dmg.alpha -= 0.02;
-        dmg.time += 1;
-      });
-      damageNumbers = damageNumbers.filter(dmg => dmg.alpha > 0);
-    }
-
-    // ================== 英雄类 ==================
-    class Hero {
-      constructor(config, x) {
-        this.config = config;
-        this.name = config.name;
-        this.type = config.type;
-        this.position = { x: x, y: HERO_Y };
-        this.level = 1;
-        this.cooldown = 0;
-        this.lastAttack = 0;
-        this.skillState = null;
-        this.attackRange = {
-          width: STAGE_WIDTH,
-          height: STAGE_HEIGHT * config.range
-        };
-        // 攻击范围底部与英雄对齐
-        this.rangeBottom = () => this.position.y;
-        this.rangeTop = () => this.position.y - this.attackRange.height;
-        this.rangeLeft = () => (STAGE_WIDTH - this.attackRange.width) / 2;
-        this.rangeRight = () => (STAGE_WIDTH + this.attackRange.width) / 2;
-        this.rangeCenter = { x: STAGE_WIDTH/2, y: STAGE_HEIGHT/2 };
-        // 技能属性
-        this.combo = 0;
-        this.bulletCount = 1;
-        this.bulletSplit = 0;
-        // 伤害值
-        this.damage = this.type === 'archer' ? 3 : (this.type === 'fire' ? 6 : (this.type === 'lightning' ? 5 : 0.5));
-        // 激光哥tick和持续
-        this.laserWidth = 16;
-        this.laserDuration = 2000; // 激光哥持续2秒
-        this.laserAlphaTick = 1;
-        this.laserCombo = 0;
-        this.laserDamage = this.type === 'laser' ? 1 : 0.3; // 激光哥每0.2秒1点
-        this.laserDurationBonus = 0;
-        this.laserWidthBonus = 0;
-        this.fireExplosionRadius = 8 * 6;
-        this.fireExplosionBonus = 0;
-        this.fireCombo = 0;
-        this.fireDamageBonus = 0;
-        this.iceCombo = 0;
-        this.iceDamageBonus = 0;
-        this.iceFreeze = 0;
-        this.lightningCombo = 0;
-        this.lightningDamageBonus = 0;
-        this.lightningStun = 0;
+        @keyframes fadeIn {
+          0% {opacity:0;}
+          100% {opacity:1;}
+        }
+        #start-btn:hover {
+          box-shadow:0 6px 32px #ffe066cc,0 1.5px 0 #fff3;
+          background-position:100% 50%;
+          transform:scale(1.06);
+        }
+        #start-btn:active {
+          transform:scale(0.97);
+        }
+      </style>
+    </div>
+    <div id="top-ui">
+      <div id="info" style="margin-top:8px;"></div>
+      <div id="life-bar" style="margin:0 auto 8px auto;max-width:400px;text-align:center;"></div>
+      <div id="control-bar" style="display:flex;justify-content:center;align-items:center;gap:16px;margin:10px auto 0 auto;max-width:400px;">
+        <button id="speed-btn" style="flex:1 1 0;padding:10px 0;font-size:17px;background:#444;color:#fff;border:none;border-radius:10px;cursor:pointer;min-width:90px;">2倍速</button>
+        <button id="pause-btn" style="flex:1 1 0;padding:10px 0;font-size:17px;background:#444;color:#fff;border:none;border-radius:10px;cursor:pointer;min-width:90px;">暂停</button>
+      </div>
+    </div>
+    <div id="game-container" style="flex:1 1 0;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0;width:100vw;max-width:750px;margin:0 auto;position:relative;">
+      <span id="version" style="position:absolute;left:8px;top:8px;z-index:10;font-size:16px;color:#aaa;user-select:none;pointer-events:none;">v1</span>
+      <canvas id="game"></canvas>
+    </div>
+    <div id="upgrade-panel">
+      <div id="upgrade-box">
+        <h2>请选择升级</h2>
+        <div id="upgrade-options"></div>
+      </div>
+    </div>
+    <button id="history-btn" style="display:block;margin:12px auto 0 auto;padding:10px 28px;font-size:18px;background:#444;color:#fff;border:none;border-radius:10px;cursor:pointer;">升级历史</button>
+    <div id="history-panel" style="display:none;position:fixed;left:0;right:0;top:0;bottom:0;background:rgba(0,0,0,0.7);z-index:20;align-items:center;justify-content:center;">
+      <div style="background:#222;border:2px solid #6cf;border-radius:12px;padding:32px 24px;min-width:220px;max-width:90vw;max-height:80vh;overflow:auto;text-align:left;box-shadow:0 0 24px #000;">
+        <h2 style="color:#6cf;margin-bottom:18px;font-size:22px;">升级历史</h2>
+        <div id="history-list"></div>
+        <button id="close-history" style="margin-top:18px;padding:8px 24px;font-size:18px;background:#444;color:#fff;border:1px solid #6cf;border-radius:10px;cursor:pointer;">关闭</button>
+      </div>
+    </div>
+    <!-- 游戏结束弹窗 -->
+    <div id="gameover-panel" style="display:none;position:fixed;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);z-index:200;align-items:center;justify-content:center;animation:fadeIn 0.7s;">
+      <div id="gameover-box" style="background:rgba(34,34,44,0.98);border:2.5px solid #6cf;border-radius:22px;padding:48px 32px 36px 32px;min-width:220px;max-width:90vw;max-height:80vh;overflow:auto;text-align:center;box-shadow:0 0 32px #000a,0 2px 0 #fff3;animation:fadeInUp 0.7s;">
+        <div id="gameover-title" style="font-size:2.2rem;margin-bottom:28px;font-weight:bold;text-shadow:0 2px 16px #000a,0 1px 0 #fff3;"></div>
+        <div id="gameover-btns"></div>
+      </div>
+      <style>
+        #gameover-title.win {
+          background:linear-gradient(90deg,#ffe066,#fff700,#fff3b0,#ffe066);
+          background-size:200% 200%;
+          background-clip:text;-webkit-background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
+          animation:shineTitle 2.5s linear infinite alternate;
+          text-shadow:0 2px 24px #ffe06655,0 1px 0 #fff3;
+        }
+        #gameover-title.fail {
+          color:#ff3b3b;
+          text-shadow:0 2px 24px #ff3b3b88,0 1px 0 #fff3;
+        }
+        #gameover-btns button {
+          padding:14px 44px;font-size:20px;margin:12px 12px 0 12px;
+          border:none;border-radius:32px;cursor:pointer;box-shadow:0 2px 16px #6cf6,0 1.5px 0 #fff3;
+          background:linear-gradient(90deg,#6cf,#ffe066,#6cf);background-size:200% 200%;color:#222;transition:transform 0.12s,box-shadow 0.2s;background-position:0% 50%;
+        }
+        #gameover-btns button:hover {
+          box-shadow:0 6px 32px #ffe066cc,0 1.5px 0 #fff3;
+          background-position:100% 50%;
+          transform:scale(1.06);
+        }
+        #gameover-btns button:active {
+          transform:scale(0.97);
+        }
+        #gameover-btns button:last-child {
+          background:linear-gradient(90deg,#444,#6cf,#444);color:#fff;
+        }
+      </style>
+    </div>
+    <script>
+      // Safari 兼容 roundRect polyfill
+      if (!CanvasRenderingContext2D.prototype.roundRect) {
+        CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+          r = r || 0;
+          this.beginPath();
+          this.moveTo(x + r, y);
+          this.lineTo(x + w - r, y);
+          this.quadraticCurveTo(x + w, y, x + w, y + r);
+          this.lineTo(x + w, y + h - r);
+          this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+          this.lineTo(x + r, y + h);
+          this.quadraticCurveTo(x, y + h, x, y + h - r);
+          this.lineTo(x, y + r);
+          this.quadraticCurveTo(x, y, x + r, y);
+          this.closePath();
+        }
       }
-      attack(enemies, bullets, effects) {
-        const now = Date.now();
-        if (now - this.lastAttack < this.getCooldown() / speedMultiplier) return;
-        let target = this.findTarget(enemies);
-        if (!target) return;
-        switch(this.type) {
-          case 'archer': {
-            // 多发箭
-            const baseAngle = Math.atan2(target.position.y - this.position.y, target.position.x - this.position.x);
-            const angleStep = 0.14;
-            const n = this.bulletCount;
-            if (n % 2 === 1) {
-              const center = (n - 1) / 2;
-              for (let i = 0; i < n; i++) {
-                const angle = baseAngle + (i - center) * angleStep;
-                bullets.push(new Bullet(this.position, angle, 16, this.damage, this.config.skill, 1, this.type, this.bulletSplit, 0, 0, null));
+      // Safari 兼容 requestAnimationFrame
+      window.requestAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame;
+      // 1. 先声明全局变量
+      let STAGE_WIDTH = 750;
+      let STAGE_HEIGHT = 1624;
+      let HERO_Y = STAGE_HEIGHT - 30;
+      let STAGE_PLAY_HEIGHT = STAGE_HEIGHT;
+      let STAGE_TOP_OFFSET = 0;
+
+      // 2. 再定义函数
+      function fixCanvasDpi(canvas) {
+        const dpr = window.devicePixelRatio || 1;
+        const mainH = document.getElementById('main-wrapper')?.offsetHeight || window.innerHeight;
+        const topUIH = document.getElementById('top-ui')?.offsetHeight || 0;
+        const availH = mainH - topUIH;
+        let width = Math.min(window.innerWidth, 750);
+        let height = Math.round(width * 1624 / 750);
+        if (height > availH) {
+          height = availH;
+          width = Math.round(height * 750 / 1624);
+        }
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        STAGE_WIDTH = 750;
+        STAGE_HEIGHT = 1624;
+        HERO_Y = STAGE_HEIGHT - 30;
+        STAGE_PLAY_HEIGHT = STAGE_HEIGHT;
+        STAGE_TOP_OFFSET = 0;
+      }
+
+      // 3. 再获取DOM和调用
+      const canvas = document.getElementById('game');
+      fixCanvasDpi(canvas);
+      window.addEventListener('resize', () => fixCanvasDpi(canvas));
+      const ctx = canvas.getContext('2d');
+      const info = document.getElementById('info');
+      // ================== 基础设置 ==================
+      const HERO_MAX = 5;
+      const HERO_MARGIN = 70;
+
+      // 英雄配置
+      const HERO_CONFIGS = [
+        {
+          name: "射手哥",
+          type: "archer",
+          range: 0.75,
+          skill: "arrow",
+          color: "#6cf"
+        },
+        {
+          name: "激光哥",
+          type: "laser",
+          range: 1,
+          skill: "laser",
+          color: "#ffe066"
+        },
+        {
+          name: "火焰哥",
+          type: "fire",
+          range: 0.5,
+          skill: "fireball",
+          color: "#ff6a00"
+        },
+        {
+          name: "寒冰哥",
+          type: "ice",
+          range: 2/3,
+          skill: "ice",
+          color: "#00e0ff"
+        },
+        {
+          name: "打雷哥",
+          type: "lightning",
+          range: 0.5,
+          skill: "lightning",
+          color: "#fff700"
+        }
+      ];
+
+      // ================== 工具函数 ==================
+      function shuffle(arr) {
+        return arr.map(v => [Math.random(), v])
+                  .sort((a, b) => a[0] - b[0])
+                  .map(v => v[1]);
+      }
+      function getHeroPositions(count) {
+        const totalWidth = (count - 1) * HERO_MARGIN;
+        const startX = STAGE_WIDTH / 2 - totalWidth / 2;
+        return Array.from({length: count}, (_, i) => startX + i * HERO_MARGIN);
+      }
+      function distance(a, b) {
+        const dx = a.x - b.x, dy = a.y - b.y;
+        return Math.sqrt(dx*dx + dy*dy);
+      }
+
+      // ================== 伤害数字 ==================
+      let damageNumbers = [];
+      function addDamageNumber(x, y, value, heroType, extra) {
+        damageNumbers.push({x, y, value, heroType, alpha: 1, vy: -1, time: 0, extra: extra||''});
+      }
+      function drawDamageNumbers(ctx) {
+        damageNumbers.forEach(dmg => {
+          ctx.save();
+          // 颜色映射
+          let color = '#fff';
+          let stroke = '#222';
+          switch(dmg.heroType) {
+            case 'archer': color = '#fff'; stroke = '#222'; break;
+            case 'ice': color = '#00e0ff'; stroke = '#005577'; break;
+            case 'fire': color = '#ff3b3b'; stroke = '#a80000'; break;
+            case 'lightning': color = '#ffe066'; stroke = '#bba800'; break;
+            case 'laser': color = '#b266ff'; stroke = '#4b0066'; break;
+          }
+          ctx.globalAlpha = dmg.alpha;
+          if (dmg.small) {
+            ctx.font = '14px Arial';
+            ctx.fillStyle = color;
+            ctx.textAlign = 'center';
+            ctx.fillText(dmg.small, dmg.x, dmg.y+18);
+          } else {
+            ctx.font = 'bold 22px Arial';
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = stroke;
+            ctx.strokeText(dmg.value + (dmg.extra||''), dmg.x, dmg.y);
+            ctx.fillStyle = color;
+            ctx.fillText(dmg.value + (dmg.extra||''), dmg.x, dmg.y);
+          }
+          ctx.restore();
+          dmg.y += dmg.vy;
+          dmg.alpha -= 0.02;
+          dmg.time += 1;
+        });
+        damageNumbers = damageNumbers.filter(dmg => dmg.alpha > 0);
+      }
+
+      // ================== 英雄类 ==================
+      class Hero {
+        constructor(config, x) {
+          this.config = config;
+          this.name = config.name;
+          this.type = config.type;
+          this.position = { x: x, y: HERO_Y };
+          this.level = 1;
+          this.cooldown = 0;
+          this.lastAttack = 0;
+          this.skillState = null;
+          this.attackRange = {
+            width: STAGE_WIDTH,
+            height: STAGE_HEIGHT * config.range
+          };
+          // 攻击范围底部与英雄对齐
+          this.rangeBottom = () => this.position.y;
+          this.rangeTop = () => this.position.y - this.attackRange.height;
+          this.rangeLeft = () => (STAGE_WIDTH - this.attackRange.width) / 2;
+          this.rangeRight = () => (STAGE_WIDTH + this.attackRange.width) / 2;
+          this.rangeCenter = { x: STAGE_WIDTH/2, y: STAGE_HEIGHT/2 };
+          // 技能属性
+          this.combo = 0;
+          this.bulletCount = 1;
+          this.bulletSplit = 0;
+          // 伤害值
+          this.damage = this.type === 'archer' ? 3 : (this.type === 'fire' ? 6 : (this.type === 'lightning' ? 5 : 0.5));
+          // 激光哥tick和持续
+          this.laserWidth = 16;
+          this.laserDuration = 2000; // 激光哥持续2秒
+          this.laserAlphaTick = 1;
+          this.laserCombo = 0;
+          this.laserDamage = this.type === 'laser' ? 1 : 0.3; // 激光哥每0.2秒1点
+          this.laserDurationBonus = 0;
+          this.laserWidthBonus = 0;
+          this.fireExplosionRadius = 8 * 6;
+          this.fireExplosionBonus = 0;
+          this.fireCombo = 0;
+          this.fireDamageBonus = 0;
+          this.iceCombo = 0;
+          this.iceDamageBonus = 0;
+          this.iceFreeze = 0;
+          this.lightningCombo = 0;
+          this.lightningDamageBonus = 0;
+          this.lightningStun = 0;
+        }
+        attack(enemies, bullets, effects) {
+          const now = Date.now();
+          if (now - this.lastAttack < this.getCooldown() / speedMultiplier) return;
+          let target = this.findTarget(enemies);
+          if (!target) return;
+          switch(this.type) {
+            case 'archer': {
+              // 多发箭
+              const baseAngle = Math.atan2(target.position.y - this.position.y, target.position.x - this.position.x);
+              const angleStep = 0.14;
+              const n = this.bulletCount;
+              if (n % 2 === 1) {
+                const center = (n - 1) / 2;
+                for (let i = 0; i < n; i++) {
+                  const angle = baseAngle + (i - center) * angleStep;
+                  bullets.push(new Bullet(this.position, angle, 16, this.damage, this.config.skill, 1, this.type, this.bulletSplit, 0, 0, null));
+                }
+              } else {
+                const leftCenter = n/2 - 1;
+                for (let i = 0; i < n; i++) {
+                  const angle = baseAngle + (i - leftCenter) * angleStep;
+                  bullets.push(new Bullet(this.position, angle, 16, this.damage, this.config.skill, 1, this.type, this.bulletSplit, 0, 0, null));
+                }
+              }
+              break;
+            }
+            case 'fire':
+              this.fireballAttack([target], bullets, effects, 0);
+              break;
+            case 'laser':
+              this.laserAttack([target], effects, 0);
+              break;
+            case 'ice':
+              this.iceAttack([target], bullets, effects, 0);
+              break;
+            case 'lightning':
+              this.lightningAttack([target], effects, 0);
+              break;
+          }
+          this.lastAttack = Date.now();
+        }
+        getCooldown() {
+          switch(this.config.skill) {
+            case "arrow": return 1500; // 丛林射手1.5秒
+            case "laser": return 6000; // 激光哥6秒
+            case "fireball": return 3000; // 火焰法师3秒
+            case "ice": return 2000;
+            case "lightning": return 2500; // 闪电哥2.5秒
+          }
+          return 1000;
+        }
+        getCombo() {
+          if (this.type === 'archer') return this.combo;
+          if (this.type === 'fire') return this.fireCombo;
+          if (this.type === 'laser') return this.laserCombo;
+          if (this.type === 'ice') return this.iceCombo;
+          if (this.type === 'lightning') return this.lightningCombo;
+          return 1;
+        }
+        arrowAttack(targets, bullets, comboIdx) {
+          const target = targets[0];
+          if (!target) return;
+          const baseAngle = Math.atan2(target.position.y - this.position.y, target.position.x - this.position.x);
+          const angleStep = 0.14; // 子弹间隔角度
+          const n = this.bulletCount;
+          if (n % 2 === 1) {
+            const center = (n - 1) / 2;
+            for (let i = 0; i < n; i++) {
+              const angle = baseAngle + (i - center) * angleStep + (comboIdx ? (comboIdx-0.5)*0.08 : 0);
+              bullets.push(new Bullet(this.position, angle, 16, this.damage, "arrow", 1, this.type, this.bulletSplit, 0, 0, null, comboIdx));
+            }
+          } else {
+            const leftCenter = n/2 - 1;
+            for (let i = 0; i < n; i++) {
+              const angle = baseAngle + (i - leftCenter) * angleStep;
+              bullets.push(new Bullet(this.position, angle, 16, this.damage, "arrow", 1, this.type, this.bulletSplit, 0, 0, null, comboIdx));
+            }
+          }
+        }
+        laserAttack(targets, effects, comboIdx) {
+          const target = targets[0];
+          if (!target) return;
+          const from = {x: this.position.x, y: this.position.y};
+          // 计算激光方向
+          const dx = target.position.x - this.position.x;
+          const dy = target.position.y - this.position.y;
+          const angle = Math.atan2(dy, dx);
+          // 计算终点：延长到屏幕边界
+          let t = 10000; // 足够大
+          let tx = from.x + Math.cos(angle) * t;
+          let ty = from.y + Math.sin(angle) * t;
+          // 找到与屏幕边界的交点
+          // 横向边界
+          if (Math.abs(Math.cos(angle)) > 1e-3) {
+            let tx1 = (0 - from.x) / Math.cos(angle);
+            let tx2 = (STAGE_WIDTH - from.x) / Math.cos(angle);
+            let ty1 = from.y + tx1 * Math.sin(angle);
+            let ty2 = from.y + tx2 * Math.sin(angle);
+            if (tx1 > 0 && ty1 >= 0 && ty1 <= STAGE_HEIGHT) { tx = 0; ty = ty1; t = tx1; }
+            if (tx2 > 0 && ty2 >= 0 && ty2 <= STAGE_HEIGHT && tx2 < t) { tx = STAGE_WIDTH; ty = ty2; t = tx2; }
+          }
+          // 纵向边界
+          if (Math.abs(Math.sin(angle)) > 1e-3) {
+            let ty1 = (0 - from.y) / Math.sin(angle);
+            let ty2 = (STAGE_HEIGHT - from.y) / Math.sin(angle);
+            let tx1 = from.x + ty1 * Math.cos(angle);
+            let tx2 = from.x + ty2 * Math.cos(angle);
+            if (ty1 > 0 && tx1 >= 0 && tx1 <= STAGE_WIDTH && ty1 < t) { tx = tx1; ty = 0; t = ty1; }
+            if (ty2 > 0 && tx2 >= 0 && tx2 <= STAGE_WIDTH && ty2 < t) { tx = tx2; ty = STAGE_HEIGHT; t = ty2; }
+          }
+          const to = {x: tx, y: ty};
+          const width = this.laserWidth * (1 + this.laserWidthBonus);
+          const duration = this.laserDuration * (1 + this.laserDurationBonus);
+          effects.push({
+            type: "laser",
+            from, to,
+            start: Date.now(),
+            duration,
+            width,
+            tick: 0,
+            hero: this
+          });
+        }
+        fireballAttack(targets, bullets, effects, comboIdx) {
+          const target = targets[0];
+          if (!target) return;
+          // 爆炸范围固定为肉盾型敌人2倍大小（27*2=54）
+          const fixedExplosionRadius = 27 * 2;
+          bullets.push(new Bullet(this.position, Math.atan2(target.position.y - this.position.y, target.position.x - this.position.x), 13, this.damage * (1 + this.fireDamageBonus), "fireball", 1, this.type, 0, fixedExplosionRadius, 0, null, comboIdx));
+        }
+        iceAttack(targets, bullets, effects, comboIdx) {
+          const target = targets[0];
+          if (!target) return;
+          bullets.push(new Bullet(this.position, Math.atan2(target.position.y - this.position.y, target.position.x - this.position.x), 13, 3 * (1 + this.iceDamageBonus), "ice", 3, this.type, 0, 0, this.iceFreeze, null, comboIdx));
+        }
+        lightningAttack(targets, effects, comboIdx) {
+          const target = targets[0];
+          if (!target) return;
+          effects.push({
+            type: "lightning",
+            x: target.position.x,
+            y: target.position.y,
+            start: Date.now(),
+            duration: 400,
+            hero: this,
+            comboIdx: comboIdx
+          });
+          effects.push({
+            type: "lightning-flash",
+            x: target.position.x,
+            y: target.position.y,
+            start: Date.now(),
+            duration: 200,
+            comboIdx: comboIdx
+          });
+          // 范围伤害
+          const radius = target.radius * 2;
+          let dmg = 5 * (1 + this.lightningDamageBonus);
+          enemies.forEach(e2 => {
+            if (e2.alive && e2.visible && Math.sqrt((e2.position.x - target.position.x) ** 2 + (e2.position.y - target.position.y) ** 2) <= radius) {
+              addDamageNumber(e2.position.x, e2.position.y-30, Math.round(dmg), "lightning", "");
+              e2.takeDamage(dmg, "lightning", "");
+              if (!e2.isBoss && this.lightningStun > 0) {
+                e2.stunUntil = Math.max(e2.stunUntil || 0, Date.now() + 1000 * this.lightningStun);
+              }
+              if (!e2.isBoss) e2.paralyzeUntil = Date.now() + 3000;
+            }
+          });
+        }
+        findTarget(enemies) {
+          if (this._lockedTarget) return this._lockedTarget;
+          // 兜底：原有逻辑
+          const left = this.rangeLeft();
+          const right = this.rangeRight();
+          const top = this.rangeTop();
+          const bottom = this.rangeBottom();
+          let candidates = enemies.filter(e =>
+            e.visible &&
+            e.position.x > left &&
+            e.position.x < right &&
+            e.position.y > top &&
+            e.position.y < bottom
+          );
+          if (candidates.length === 0) return null;
+          return candidates.reduce((maxE, e) => (e.position.y > maxE.position.y ? e : maxE), candidates[0]);
+        }
+      }
+
+      // ================== 子弹类 ==================
+      class Bullet {
+        constructor(position, angle, speed, damage, type, pierce=1, heroType, split=0, explosionRadius=0, freeze=0, excludeTarget=null, comboIdx) {
+          this.position = { x: position.x, y: position.y };
+          this.velocity = { x: speed * Math.cos(angle), y: speed * Math.sin(angle) };
+          this.damage = damage;
+          this.radius = type === 'fireball' ? 10 : (type === 'ice' ? 9 : 8);
+          this.type = type;
+          this.active = true;
+          this.pierce = pierce;
+          this.hitEnemies = new Set();
+          this.heroType = heroType;
+          this.split = split;
+          this.explosionRadius = explosionRadius;
+          this.freeze = freeze;
+          this.bulletSplitTimes = 0;
+          this.excludeTarget = excludeTarget; // 新增：分裂子弹不能命中原目标
+          this.comboIdx = typeof comboIdx === 'number' ? comboIdx : 0;
+        }
+        update() {
+          this.position.x += this.velocity.x;
+          this.position.y += this.velocity.y;
+          if (this.position.x < 0 || this.position.x > STAGE_WIDTH ||
+              this.position.y < 0 || this.position.y > STAGE_HEIGHT) {
+            this.active = false;
+          }
+        }
+      }
+
+      // ================== 敌人类 ==================
+      class Enemy {
+        constructor(x, y, hp, scale=1, isBoss=false, appearTime=0, enemyType='normal') {
+          this.position = { x, y };
+          if (isBoss) {
+            this.radius = 18 * scale;
+          } else if (enemyType === 'fast') {
+            this.radius = 9 * scale;
+            this.hp = Math.round(hp * 2 / 3);
+            this.maxHp = this.hp;
+          } else if (enemyType === 'tank') {
+            this.radius = 27 * scale;
+            this.hp = Math.round(hp * 2);
+            this.maxHp = this.hp;
+          } else {
+            this.radius = 18 * scale;
+          }
+          this.hp = hp;
+          this.maxHp = hp;
+          this.alive = true;
+          this.type = enemyType;
+          // 固定速度
+          if (isBoss) {
+            this.speed = 0.3;
+          } else if (enemyType === 'fast') {
+            this.speed = 0.9;
+            this.hp = Math.round(hp * 2 / 3);
+            this.maxHp = this.hp;
+          } else if (enemyType === 'tank') {
+            this.speed = 0.3;
+            this.hp = Math.round(hp * 2);
+            this.maxHp = this.hp;
+          } else {
+            this.speed = 0.6;
+          }
+          this.slowUntil = 0;
+          this.stunUntil = 0;
+          this.frozenUntil = 0;
+          this.isBoss = isBoss;
+          this.appearTime = appearTime; // 新增：出现时间戳
+          this.visible = false;
+          this.burnUntil = 0; // 燃烧结束时间
+          this.burnDps = 0;   // 燃烧伤害/秒
+          this.lastBurnTick = 0;
+          this.paralyzeUntil = 0; // 麻痹结束时间
+        }
+        update(now) {
+          if (!this.visible) {
+            if (now < this.appearTime) return;
+            this.visible = true;
+          }
+          let speed = this.speed * speedMultiplier;
+          if (!this.isBoss) {
+            if (Date.now() < this.slowUntil) speed *= 0.5;
+            if (Date.now() < this.stunUntil) speed = 0;
+            if (Date.now() < this.frozenUntil) speed = 0;
+          }
+          this.position.y += speed;
+          if (this.position.y > STAGE_HEIGHT) this.alive = false;
+          // 燃烧伤害
+          if (!this.isBoss) {
+            if (Date.now() < this.burnUntil) {
+              if (!this.lastBurnTick) this.lastBurnTick = Date.now();
+              while (this.lastBurnTick + 1000/speedMultiplier <= Date.now() && this.alive) {
+                this.lastBurnTick += 1000/speedMultiplier;
+                let dmg = Math.max(1, Math.round(this.burnDps));
+                this.hp -= dmg;
+                addDamageNumber(this.position.x, this.position.y-40, dmg, "fire", "");
               }
             } else {
-              const leftCenter = n/2 - 1;
-              for (let i = 0; i < n; i++) {
-                const angle = baseAngle + (i - leftCenter) * angleStep;
-                bullets.push(new Bullet(this.position, angle, 16, this.damage, this.config.skill, 1, this.type, this.bulletSplit, 0, 0, null));
-              }
+              this.burnDps = 0;
+              this.lastBurnTick = 0;
             }
-            break;
-          }
-          case 'fire':
-            this.fireballAttack([target], bullets, effects, 0);
-            break;
-          case 'laser':
-            this.laserAttack([target], effects, 0);
-            break;
-          case 'ice':
-            this.iceAttack([target], bullets, effects, 0);
-            break;
-          case 'lightning':
-            this.lightningAttack([target], effects, 0);
-            break;
-        }
-        this.lastAttack = Date.now();
-      }
-      getCooldown() {
-        switch(this.config.skill) {
-          case "arrow": return 1500; // 丛林射手1.5秒
-          case "laser": return 6000; // 激光哥6秒
-          case "fireball": return 3000; // 火焰法师3秒
-          case "ice": return 2000;
-          case "lightning": return 2500; // 闪电哥2.5秒
-        }
-        return 1000;
-      }
-      getCombo() {
-        if (this.type === 'archer') return this.combo;
-        if (this.type === 'fire') return this.fireCombo;
-        if (this.type === 'laser') return this.laserCombo;
-        if (this.type === 'ice') return this.iceCombo;
-        if (this.type === 'lightning') return this.lightningCombo;
-        return 1;
-      }
-      arrowAttack(targets, bullets, comboIdx) {
-        const target = targets[0];
-        if (!target) return;
-        const baseAngle = Math.atan2(target.position.y - this.position.y, target.position.x - this.position.x);
-        const angleStep = 0.14; // 子弹间隔角度
-        const n = this.bulletCount;
-        if (n % 2 === 1) {
-          const center = (n - 1) / 2;
-          for (let i = 0; i < n; i++) {
-            const angle = baseAngle + (i - center) * angleStep + (comboIdx ? (comboIdx-0.5)*0.08 : 0);
-            bullets.push(new Bullet(this.position, angle, 16, this.damage, "arrow", 1, this.type, this.bulletSplit, 0, 0, null, comboIdx));
-          }
-        } else {
-          const leftCenter = n/2 - 1;
-          for (let i = 0; i < n; i++) {
-            const angle = baseAngle + (i - leftCenter) * angleStep;
-            bullets.push(new Bullet(this.position, angle, 16, this.damage, "arrow", 1, this.type, this.bulletSplit, 0, 0, null, comboIdx));
           }
         }
-      }
-      laserAttack(targets, effects, comboIdx) {
-        const target = targets[0];
-        if (!target) return;
-        const from = {x: this.position.x, y: this.position.y};
-        // 计算激光方向
-        const dx = target.position.x - this.position.x;
-        const dy = target.position.y - this.position.y;
-        const angle = Math.atan2(dy, dx);
-        // 计算终点：延长到屏幕边界
-        let t = 10000; // 足够大
-        let tx = from.x + Math.cos(angle) * t;
-        let ty = from.y + Math.sin(angle) * t;
-        // 找到与屏幕边界的交点
-        // 横向边界
-        if (Math.abs(Math.cos(angle)) > 1e-3) {
-          let tx1 = (0 - from.x) / Math.cos(angle);
-          let tx2 = (STAGE_WIDTH - from.x) / Math.cos(angle);
-          let ty1 = from.y + tx1 * Math.sin(angle);
-          let ty2 = from.y + tx2 * Math.sin(angle);
-          if (tx1 > 0 && ty1 >= 0 && ty1 <= STAGE_HEIGHT) { tx = 0; ty = ty1; t = tx1; }
-          if (tx2 > 0 && ty2 >= 0 && ty2 <= STAGE_HEIGHT && tx2 < t) { tx = STAGE_WIDTH; ty = ty2; t = tx2; }
-        }
-        // 纵向边界
-        if (Math.abs(Math.sin(angle)) > 1e-3) {
-          let ty1 = (0 - from.y) / Math.sin(angle);
-          let ty2 = (STAGE_HEIGHT - from.y) / Math.sin(angle);
-          let tx1 = from.x + ty1 * Math.cos(angle);
-          let tx2 = from.x + ty2 * Math.cos(angle);
-          if (ty1 > 0 && tx1 >= 0 && tx1 <= STAGE_WIDTH && ty1 < t) { tx = tx1; ty = 0; t = ty1; }
-          if (ty2 > 0 && tx2 >= 0 && tx2 <= STAGE_WIDTH && ty2 < t) { tx = tx2; ty = STAGE_HEIGHT; t = ty2; }
-        }
-        const to = {x: tx, y: ty};
-        const width = this.laserWidth * (1 + this.laserWidthBonus);
-        const duration = this.laserDuration * (1 + this.laserDurationBonus);
-        effects.push({
-          type: "laser",
-          from, to,
-          start: Date.now(),
-          duration,
-          width,
-          tick: 0,
-          hero: this
-        });
-      }
-      fireballAttack(targets, bullets, effects, comboIdx) {
-        const target = targets[0];
-        if (!target) return;
-        // 爆炸范围固定为肉盾型敌人2倍大小（27*2=54）
-        const fixedExplosionRadius = 27 * 2;
-        bullets.push(new Bullet(this.position, Math.atan2(target.position.y - this.position.y, target.position.x - this.position.x), 13, this.damage * (1 + this.fireDamageBonus), "fireball", 1, this.type, 0, fixedExplosionRadius, 0, null, comboIdx));
-      }
-      iceAttack(targets, bullets, effects, comboIdx) {
-        const target = targets[0];
-        if (!target) return;
-        bullets.push(new Bullet(this.position, Math.atan2(target.position.y - this.position.y, target.position.x - this.position.x), 13, 3 * (1 + this.iceDamageBonus), "ice", 3, this.type, 0, 0, this.iceFreeze, null, comboIdx));
-      }
-      lightningAttack(targets, effects, comboIdx) {
-        const target = targets[0];
-        if (!target) return;
-        effects.push({
-          type: "lightning",
-          x: target.position.x,
-          y: target.position.y,
-          start: Date.now(),
-          duration: 400,
-          hero: this,
-          comboIdx: comboIdx
-        });
-        effects.push({
-          type: "lightning-flash",
-          x: target.position.x,
-          y: target.position.y,
-          start: Date.now(),
-          duration: 200,
-          comboIdx: comboIdx
-        });
-        // 范围伤害
-        const radius = target.radius * 2;
-        let dmg = 5 * (1 + this.lightningDamageBonus);
-        enemies.forEach(e2 => {
-          if (e2.alive && e2.visible && Math.sqrt((e2.position.x - target.position.x) ** 2 + (e2.position.y - target.position.y) ** 2) <= radius) {
-            addDamageNumber(e2.position.x, e2.position.y-30, Math.round(dmg), "lightning", "");
-            e2.takeDamage(dmg, "lightning", "");
-            if (!e2.isBoss && this.lightningStun > 0) {
-              e2.stunUntil = Math.max(e2.stunUntil || 0, Date.now() + 1000 * this.lightningStun);
-            }
-            if (!e2.isBoss) e2.paralyzeUntil = Date.now() + 3000;
+        // 处理麻痹加伤
+        takeDamage(amount, heroType, extraText, comboIdx=0) {
+          let baseDmg = Math.max(1, Math.round(amount));
+          let isParalyze = !this.isBoss && Date.now() < this.paralyzeUntil;
+          let paralyzeDmg = 0;
+          if (isParalyze) {
+            paralyzeDmg = Math.max(1, Math.round(baseDmg * 0.2));
           }
-        });
+          let dmg = baseDmg + paralyzeDmg;
+          this.hp -= dmg;
+          // 主伤害数字，麻痹时额外加成显示为"额外x"
+          let extraStr = '';
+          if (isParalyze && paralyzeDmg > 0) {
+            extraStr = '额外' + paralyzeDmg;
+          }
+          addDamageNumber(this.position.x, this.position.y-30-20*(comboIdx||0), baseDmg, heroType, extraText||extraStr);
+        }
       }
-      findTarget(enemies) {
-        if (this._lockedTarget) return this._lockedTarget;
-        // 兜底：原有逻辑
-        const left = this.rangeLeft();
-        const right = this.rangeRight();
-        const top = this.rangeTop();
-        const bottom = this.rangeBottom();
-        let candidates = enemies.filter(e =>
-          e.visible &&
-          e.position.x > left &&
-          e.position.x < right &&
-          e.position.y > top &&
-          e.position.y < bottom
-        );
-        if (candidates.length === 0) return null;
-        return candidates.reduce((maxE, e) => (e.position.y > maxE.position.y ? e : maxE), candidates[0]);
-      }
-    }
 
-    // ================== 子弹类 ==================
-    class Bullet {
-      constructor(position, angle, speed, damage, type, pierce=1, heroType, split=0, explosionRadius=0, freeze=0, excludeTarget=null, comboIdx) {
-        this.position = { x: position.x, y: position.y };
-        this.velocity = { x: speed * Math.cos(angle), y: speed * Math.sin(angle) };
-        this.damage = damage;
-        this.radius = type === 'fireball' ? 10 : (type === 'ice' ? 9 : 8);
-        this.type = type;
-        this.active = true;
-        this.pierce = pierce;
-        this.hitEnemies = new Set();
-        this.heroType = heroType;
-        this.split = split;
-        this.explosionRadius = explosionRadius;
-        this.freeze = freeze;
-        this.bulletSplitTimes = 0;
-        this.excludeTarget = excludeTarget; // 新增：分裂子弹不能命中原目标
-        this.comboIdx = typeof comboIdx === 'number' ? comboIdx : 0;
-      }
-      update() {
-        this.position.x += this.velocity.x;
-        this.position.y += this.velocity.y;
-        if (this.position.x < 0 || this.position.x > STAGE_WIDTH ||
-            this.position.y < 0 || this.position.y > STAGE_HEIGHT) {
-          this.active = false;
+      // ================== 玩家类 ==================
+      class Player {
+        constructor() {
+          this.exp = 0;
+          this.level = 1;
+          this.heroes = [new Hero(HERO_CONFIGS[0], STAGE_WIDTH/2)];
+          this.upgradeCounts = {};
+          this.expThreshold = [Math.max(1, 5 + (this.level-1) - 2)]; // 每级+1，基础值-2
+          this.killCount = 0;
+          this.life = 10;
+          this.updateExpThreshold(1);
+          this.upgradeHistory = [];
         }
-      }
-    }
-
-    // ================== 敌人类 ==================
-    class Enemy {
-      constructor(x, y, hp, scale=1, isBoss=false, appearTime=0, enemyType='normal') {
-        this.position = { x, y };
-        if (isBoss) {
-          this.radius = 18 * scale;
-        } else if (enemyType === 'fast') {
-          this.radius = 9 * scale;
-          this.hp = Math.round(hp * 2 / 3);
-          this.maxHp = this.hp;
-        } else if (enemyType === 'tank') {
-          this.radius = 27 * scale;
-          this.hp = Math.round(hp * 2);
-          this.maxHp = this.hp;
-        } else {
-          this.radius = 18 * scale;
+        updateExpThreshold() {
+          // 每级+1
+          this.expThreshold = [Math.max(1, 5 + (this.level-1) - 2)];
         }
-        this.hp = hp;
-        this.maxHp = hp;
-        this.alive = true;
-        this.type = enemyType;
-        // 固定速度
-        if (isBoss) {
-          this.speed = 0.3;
-        } else if (enemyType === 'fast') {
-          this.speed = 0.9;
-          this.hp = Math.round(hp * 2 / 3);
-          this.maxHp = this.hp;
-        } else if (enemyType === 'tank') {
-          this.speed = 0.3;
-          this.hp = Math.round(hp * 2);
-          this.maxHp = this.hp;
-        } else {
-          this.speed = 0.6;
-        }
-        this.slowUntil = 0;
-        this.stunUntil = 0;
-        this.frozenUntil = 0;
-        this.isBoss = isBoss;
-        this.appearTime = appearTime; // 新增：出现时间戳
-        this.visible = false;
-        this.burnUntil = 0; // 燃烧结束时间
-        this.burnDps = 0;   // 燃烧伤害/秒
-        this.lastBurnTick = 0;
-        this.paralyzeUntil = 0; // 麻痹结束时间
-      }
-      update(now) {
-        if (!this.visible) {
-          if (now < this.appearTime) return;
-          this.visible = true;
-        }
-        let speed = this.speed * speedMultiplier;
-        if (!this.isBoss) {
-          if (Date.now() < this.slowUntil) speed *= 0.5;
-          if (Date.now() < this.stunUntil) speed = 0;
-          if (Date.now() < this.frozenUntil) speed = 0;
-        }
-        this.position.y += speed;
-        if (this.position.y > STAGE_HEIGHT) this.alive = false;
-        // 燃烧伤害
-        if (!this.isBoss) {
-          if (Date.now() < this.burnUntil) {
-            if (!this.lastBurnTick) this.lastBurnTick = Date.now();
-            while (this.lastBurnTick + 1000/speedMultiplier <= Date.now() && this.alive) {
-              this.lastBurnTick += 1000/speedMultiplier;
-              let dmg = Math.max(1, Math.round(this.burnDps));
-              this.hp -= dmg;
-              addDamageNumber(this.position.x, this.position.y-40, dmg, "fire", "");
-            }
-          } else {
-            this.burnDps = 0;
-            this.lastBurnTick = 0;
+        gainExp(amount) {
+          this.exp += amount;
+          while (this.exp >= this.expThreshold[0]) {
+            this.exp -= this.expThreshold[0];
+            this.level++;
+            this.updateExpThreshold();
+            showUpgrade(this);
           }
         }
-      }
-      // 处理麻痹加伤
-      takeDamage(amount, heroType, extraText, comboIdx=0) {
-        let baseDmg = Math.max(1, Math.round(amount));
-        let isParalyze = !this.isBoss && Date.now() < this.paralyzeUntil;
-        let paralyzeDmg = 0;
-        if (isParalyze) {
-          paralyzeDmg = Math.max(1, Math.round(baseDmg * 0.2));
-        }
-        let dmg = baseDmg + paralyzeDmg;
-        this.hp -= dmg;
-        // 主伤害数字，麻痹时额外加成显示为"额外x"
-        let extraStr = '';
-        if (isParalyze && paralyzeDmg > 0) {
-          extraStr = '额外' + paralyzeDmg;
-        }
-        addDamageNumber(this.position.x, this.position.y-30-20*(comboIdx||0), baseDmg, heroType, extraText||extraStr);
-      }
-    }
-
-    // ================== 玩家类 ==================
-    class Player {
-      constructor() {
-        this.exp = 0;
-        this.level = 1;
-        this.heroes = [new Hero(HERO_CONFIGS[0], STAGE_WIDTH/2)];
-        this.upgradeCounts = {};
-        this.expThreshold = [Math.max(1, 5 + (this.level-1) - 2)]; // 每级+1，基础值-2
-        this.killCount = 0;
-        this.life = 10;
-        this.updateExpThreshold(1);
-        this.upgradeHistory = [];
-      }
-      updateExpThreshold() {
-        // 每级+1
-        this.expThreshold = [Math.max(1, 5 + (this.level-1) - 2)];
-      }
-      gainExp(amount) {
-        this.exp += amount;
-        while (this.exp >= this.expThreshold[0]) {
-          this.exp -= this.expThreshold[0];
-          this.level++;
-          this.updateExpThreshold();
-          showUpgrade(this);
+        addHero(type) {
+          if (this.heroes.find(h => h.type === type)) return;
+          const idx = HERO_CONFIGS.findIndex(cfg => cfg.type === type);
+          const positions = getHeroPositions(this.heroes.length + 1);
+          // 新增英雄时保留原有英雄属性
+          const newHero = new Hero(HERO_CONFIGS[idx], positions[this.heroes.length]);
+          this.heroes.push(newHero);
+          this.heroes.forEach((hero, i) => hero.position.x = positions[i]);
         }
       }
-      addHero(type) {
-        if (this.heroes.find(h => h.type === type)) return;
-        const idx = HERO_CONFIGS.findIndex(cfg => cfg.type === type);
-        const positions = getHeroPositions(this.heroes.length + 1);
-        // 新增英雄时保留原有英雄属性
-        const newHero = new Hero(HERO_CONFIGS[idx], positions[this.heroes.length]);
-        this.heroes.push(newHero);
-        this.heroes.forEach((hero, i) => hero.position.x = positions[i]);
-      }
-    }
 
-    // ================== 波次管理 ==================
-    class WaveManager {
-      constructor() {
-        this.currentWave = 0;
-        this.totalWaves = 20;
-      }
-      nextWave() {
-        this.currentWave++;
-      }
-      spawnWave() {
-        const enemies = [];
-        const count = 5 + (this.currentWave - 1);
-        // 每2波增加基础值1的0%，即血量不再随波次提升，只保留基础值
-        let baseHp = 6;
-        const segments = Math.min(count, 8);
-        const now = Date.now();
-        const interval = 20000; // 20秒
-        const enemyTypes = ['normal','fast','tank'];
-        for (let i = 0; i < count; i++) {
-          const seg = i % segments;
-          const segWidth = STAGE_WIDTH / segments;
-          const x = segWidth * seg + segWidth/2 + (Math.random()-0.5)*segWidth*0.6;
-          const yBase = 20 + seg * 30;
-          const y = yBase + Math.random()*20 + STAGE_TOP_OFFSET;
-          // 均匀分布在N秒内
-          const appearTime = now + Math.floor(i * interval / count);
-          // 随机类型
-          const type = enemyTypes[Math.floor(Math.random()*enemyTypes.length)];
-          enemies.push(new Enemy(x, y, baseHp, 1, false, appearTime, type));
+      // ================== 波次管理 ==================
+      class WaveManager {
+        constructor() {
+          this.currentWave = 0;
+          this.totalWaves = 20;
         }
-        // 特殊大怪分散x/y
-        const bossWaves = [5, 10, 15, 20];
-        if (bossWaves.includes(this.currentWave)) {
-          const bossCount = 1;
-          for (let i = 0; i < bossCount; i++) {
-            let bossHp = 50, bossScale = 1.5;
-            let y = 100 + i * 120 + Math.random()*60 + STAGE_TOP_OFFSET;
-            let x = STAGE_WIDTH/(bossCount+1)*(i+1);
-            if (this.currentWave === 10) { bossHp = 100; bossScale = 2; }
-            if (this.currentWave === 15) { bossHp = 150; bossScale = 2.5; }
-            if (this.currentWave === 20) { bossHp = 200; bossScale = 3; }
-            enemies.push(new Enemy(x, y, bossHp, bossScale, true));
-          }
+        nextWave() {
+          this.currentWave++;
         }
-        return enemies;
-      }
-    }
-
-    // ================== 升级选项生成 ==================
-    function getUpgradeOptions(player) {
-      const options = [];
-      const counts = player.upgradeCounts;
-      const has = type => player.heroes.find(h => h.type === type);
-      if (!has('fire') && !counts['fire_spawn']) options.push({text: '火焰哥出场（范围、伤害）', key: 'fire_spawn'});
-      if (has('fire') && (counts['fire_damage']||0)<10) options.push({text: '火焰哥伤害增加60%', key: 'fire_damage'});
-      if (has('fire') && (counts['fire_explosion']||0)<2) options.push({text: '火焰哥爆炸范围扩大50%', key: 'fire_explosion'});
-      if (!has('laser') && !counts['laser_spawn']) options.push({text: '激光哥出场（直线、伤害）', key: 'laser_spawn'});
-      if (has('laser') && (counts['laser_damage']||0)<10) options.push({text: '激光哥伤害增加60%', key: 'laser_damage'});
-      if (has('laser') && (counts['laser_duration']||0)<2) options.push({text: '激光哥持久输出', key: 'laser_duration'});
-      if (has('laser') && (counts['laser_width']||0)<2) options.push({text: '激光哥光束变粗50%', key: 'laser_width'});
-      if (!has('lightning') && !counts['lightning_spawn']) options.push({text: '打雷哥出场（范围、增伤）', key: 'lightning_spawn'});
-      if (has('lightning') && (counts['lightning_damage']||0)<10) options.push({text: '打雷哥伤害增加60%', key: 'lightning_damage'});
-      if (has('lightning') && (counts['lightning_stun']||0)<2) options.push({text: '打雷哥附带晕眩', key: 'lightning_stun'});
-      if (!has('ice') && !counts['ice_spawn']) options.push({text: '寒冰哥出场（减速、穿透）', key: 'ice_spawn'});
-      if (has('ice') && (counts['ice_damage']||0)<10) options.push({text: '寒冰哥伤害增加60%', key: 'ice_damage'});
-      if (has('ice') && (counts['ice_freeze']||0)<2) options.push({text: '寒冰哥附带冻结', key: 'ice_freeze'});
-      if ((counts['archer_bullet']||0)<2) options.push({text: '射手哥子弹+1', key: 'archer_bullet'});
-      if ((counts['archer_damage']||0)<10) options.push({text: '射手哥伤害增加60%', key: 'archer_damage'});
-      if ((counts['archer_split']||0)<2) options.push({text: '射手哥子弹分裂+1', key: 'archer_split'});
-      return shuffle(options).slice(0, 3);
-    }
-
-    // ================== 升级弹窗（点击式） ==================
-    function showUpgrade(player, isBossReward) {
-      const panel = document.getElementById('upgrade-panel');
-      const optionsDiv = document.getElementById('upgrade-options');
-      optionsDiv.innerHTML = '';
-      // 修改标题
-      const title = panel.querySelector('#upgrade-box h2');
-      if (isBossReward) {
-        title.innerText = 'BOSS奖励';
-      } else {
-        title.innerText = '请选择升级';
-      }
-      const options = getUpgradeOptions(player);
-      options.forEach(opt => {
-        const btn = document.createElement('button');
-        btn.className = 'upgrade-btn';
-        btn.innerText = opt.text;
-        btn.onclick = () => {
-          panel.style.display = 'none';
-          player.upgradeCounts[opt.key] = (player.upgradeCounts[opt.key]||0)+1;
-          // 记录升级历史
-          player.upgradeHistory.push({
-            key: opt.key,
-            text: opt.text,
-            time: new Date().toLocaleTimeString()
-          });
-          // 处理升级效果
-          if (opt.key === 'fire_spawn') player.addHero('fire');
-          if (opt.key === 'fire_combo') player.heroes.find(h=>h.type==='fire').fireCombo++;
-          if (opt.key === 'fire_damage') player.heroes.find(h=>h.type==='fire').fireDamageBonus += 0.6;
-          if (opt.key === 'fire_explosion') player.heroes.find(h=>h.type==='fire').fireExplosionBonus += 0.5;
-          if (opt.key === 'laser_spawn') player.addHero('laser');
-          if (opt.key === 'laser_damage') player.heroes.find(h=>h.type==='laser').laserDamage *= 1.6;
-          if (opt.key === 'laser_duration') player.heroes.find(h=>h.type==='laser').laserDurationBonus += 0.5;
-          if (opt.key === 'laser_width') player.heroes.find(h=>h.type==='laser').laserWidthBonus += 0.5;
-          if (opt.key === 'lightning_spawn') player.addHero('lightning');
-          if (opt.key === 'lightning_damage') player.heroes.find(h=>h.type==='lightning').lightningDamageBonus += 0.6;
-          if (opt.key === 'lightning_combo') player.heroes.find(h=>h.type==='lightning').lightningCombo++;
-          if (opt.key === 'lightning_stun') player.heroes.find(h=>h.type==='lightning').lightningStun++;
-          if (opt.key === 'ice_spawn') player.addHero('ice');
-          if (opt.key === 'ice_damage') player.heroes.find(h=>h.type==='ice').iceDamageBonus += 0.6;
-          if (opt.key === 'ice_combo') player.heroes.find(h=>h.type==='ice').iceCombo++;
-          if (opt.key === 'ice_freeze') player.heroes.find(h=>h.type==='ice').iceFreeze++;
-          if (opt.key === 'archer_bullet') player.heroes.find(h=>h.type==='archer').bulletCount++;
-          if (opt.key === 'archer_damage') player.heroes.find(h=>h.type==='archer').damage *= 1.6;
-          if (opt.key === 'archer_split') player.heroes.find(h=>h.type==='archer').bulletSplit++;
-        };
-        optionsDiv.appendChild(btn);
-      });
-      panel.style.display = 'flex';
-    }
-
-    // ================== 攻击范围显示控制 ==================
-    let selectedHeroIdx = null;
-
-    // canvas内icon参数
-    const iconPause = { x: STAGE_WIDTH-38, y: 100, r: 22 };
-    const iconSpeed = { x: STAGE_WIDTH-38, y: 156, r: 22 };
-
-    // 工具函数：判断点是否在圆内
-    function inCircle(mx, my, cx, cy, r) {
-      return (mx-cx)*(mx-cx)+(my-cy)*(my-cy) <= r*r;
-    }
-
-    // 事件监听 passive 兼容
-    let supportsPassive = false;
-    try {
-      window.addEventListener("test", null, Object.defineProperty({}, 'passive', {
-        get: function() { supportsPassive = true; }
-      }));
-    } catch(e) {}
-
-    // 修复：PC端click事件
-    canvas.addEventListener('click', function(e) {
-      const rect = canvas.getBoundingClientRect();
-      // 适配高分屏canvas缩放
-      const mx = (e.clientX - rect.left) * (canvas.width / canvas.offsetWidth);
-      const my = (e.clientY - rect.top) * (canvas.height / canvas.offsetHeight);
-      // 先判断icon
-      if (inCircle(mx, my, iconPause.x, iconPause.y, iconPause.r)) {
-        paused = !paused;
-        // 同步页面按钮
-        if (paused) {
-          pauseBtn.style.background = '#6cf';
-          pauseBtn.style.color = '#222';
-          pauseBtn.innerText = '继续';
-        } else {
-          pauseBtn.style.background = '#444';
-          pauseBtn.style.color = '#fff';
-          pauseBtn.innerText = '暂停';
-          requestAnimationFrame(gameLoop);
-        }
-        return;
-      }
-      if (inCircle(mx, my, iconSpeed.x, iconSpeed.y, iconSpeed.r)) {
-        if (speedMultiplier === 1) {
-          speedMultiplier = 2;
-          speedBtn.style.background = '#6cf';
-          speedBtn.style.color = '#222';
-          speedBtn.innerText = '1倍速';
-        } else {
-          speedMultiplier = 1;
-          speedBtn.style.background = '#444';
-          speedBtn.style.color = '#fff';
-          speedBtn.innerText = '2倍速';
-        }
-        return;
-      }
-      // 英雄选中逻辑
-      let found = false;
-      player.heroes.forEach((hero, idx) => {
-        const dx = mx - hero.position.x * (canvas.width / canvas.offsetWidth);
-        const dy = my - hero.position.y * (canvas.height / canvas.offsetHeight);
-        if (dx*dx + dy*dy <= 22*22) {
-          if (selectedHeroIdx === idx) {
-            selectedHeroIdx = null;
-          } else {
-            selectedHeroIdx = idx;
-          }
-          found = true;
-        }
-      });
-      if (!found) selectedHeroIdx = null;
-    });
-    // 移动端touch事件
-    canvas.addEventListener('touchstart', function(e) {
-      const rect = canvas.getBoundingClientRect();
-      const touch = e.touches[0];
-      const mx = (touch.clientX - rect.left) * (canvas.width / canvas.offsetWidth);
-      const my = (touch.clientY - rect.top) * (canvas.height / canvas.offsetHeight);
-      // 先判断icon
-      if (inCircle(mx, my, iconPause.x, iconPause.y, iconPause.r)) {
-        paused = !paused;
-        if (paused) {
-          pauseBtn.style.background = '#6cf';
-          pauseBtn.style.color = '#222';
-          pauseBtn.innerText = '继续';
-        } else {
-          pauseBtn.style.background = '#444';
-          pauseBtn.style.color = '#fff';
-          pauseBtn.innerText = '暂停';
-          requestAnimationFrame(gameLoop);
-        }
-        e.preventDefault();
-        return;
-      }
-      if (inCircle(mx, my, iconSpeed.x, iconSpeed.y, iconSpeed.r)) {
-        if (speedMultiplier === 1) {
-          speedMultiplier = 2;
-          speedBtn.style.background = '#6cf';
-          speedBtn.style.color = '#222';
-          speedBtn.innerText = '1倍速';
-        } else {
-          speedMultiplier = 1;
-          speedBtn.style.background = '#444';
-          speedBtn.style.color = '#fff';
-          speedBtn.innerText = '2倍速';
-        }
-        e.preventDefault();
-        return;
-      }
-      // 英雄选中逻辑
-      let found = false;
-      player.heroes.forEach((hero, idx) => {
-        const dx = mx - hero.position.x * (canvas.width / canvas.offsetWidth);
-        const dy = my - hero.position.y * (canvas.height / canvas.offsetHeight);
-        if (dx*dx + dy*dy <= 22*22) {
-          if (selectedHeroIdx === idx) {
-            selectedHeroIdx = null;
-          } else {
-            selectedHeroIdx = idx;
-          }
-          found = true;
-        }
-      });
-      if (!found) selectedHeroIdx = null;
-      e.preventDefault();
-    }, supportsPassive ? {passive: false} : false);
-
-    // ================== 游戏主循环 ==================
-    const player = new Player();
-    const waveManager = new WaveManager();
-    let enemies = waveManager.spawnWave();
-    let bullets = [];
-    let effects = [];
-    let lastWaveTime = Date.now();
-    let lastAutoWaveTime = Date.now();
-
-    // 修复刷怪逻辑，避免多波同时生成
-    let wavePending = false;
-    let nextWaveTime = 0;
-    let gameStarted = false;
-    let gameStartTime = 0;
-    let gameOver = false;
-
-    // 开始游戏按钮逻辑，currentWave初始化为0，点击后设为1并生成第一波
-    const startBtn = document.getElementById('start-btn');
-    const startScreen = document.getElementById('start-screen');
-    startBtn.onclick = function() {
-      startScreen.style.display = 'none';
-      gameStarted = true;
-      waveManager.currentWave = 0;
-      player.updateExpThreshold();
-      player.killCount = 0;
-      waveManager.nextWave();
-      enemies = waveManager.spawnWave();
-      wavePending = true;
-      nextWaveTime = Date.now() + 10000;
-      gameStartTime = Date.now();
-      fixCanvasDpi(canvas); // 确保参数同步
-      requestAnimationFrame(gameLoop); // 确保主循环启动
-    }
-    // 2倍速控制
-    let speedMultiplier = 1;
-    const speedBtn = document.getElementById('speed-btn');
-    speedBtn.onclick = function() {
-      if (speedMultiplier === 1) {
-        speedMultiplier = 2;
-        speedBtn.style.background = '#6cf';
-        speedBtn.style.color = '#222';
-        speedBtn.innerText = '1倍速';
-      } else {
-        speedMultiplier = 1;
-        speedBtn.style.background = '#444';
-        speedBtn.style.color = '#fff';
-        speedBtn.innerText = '2倍速';
-      }
-    }
-    // 暂停功能
-    let paused = false;
-    const pauseBtn = document.getElementById('pause-btn');
-    pauseBtn.onclick = function() {
-      paused = !paused;
-      if (paused) {
-        pauseBtn.style.background = '#6cf';
-        pauseBtn.style.color = '#222';
-        pauseBtn.innerText = '继续';
-      } else {
-        pauseBtn.style.background = '#444';
-        pauseBtn.style.color = '#fff';
-        pauseBtn.innerText = '暂停';
-        requestAnimationFrame(gameLoop);
-      }
-    }
-    let lastGameNow = Date.now();
-    function gameLoop() {
-      requestAnimationFrame(gameLoop);
-      let now;
-      if (paused || document.getElementById('upgrade-panel').style.display === 'flex' || gameOver) {
-        now = lastGameNow;
-        draw(now);
-        return;
-      } else {
-        now = Date.now();
-        lastGameNow = now;
-      }
-      if (!gameStarted) {
-        draw(now);
-        return;
-      }
-      // --- 新增：数组上限，防止溢出 ---
-      const MAX_ENEMIES = 500, MAX_BULLETS = 500, MAX_EFFECTS = 500;
-      if (enemies.length > MAX_ENEMIES) enemies = enemies.slice(enemies.length - MAX_ENEMIES);
-      if (bullets.length > MAX_BULLETS) bullets = bullets.slice(bullets.length - MAX_BULLETS);
-      if (effects.length > MAX_EFFECTS) effects = effects.slice(effects.length - MAX_EFFECTS);
-      // ---
-      // --- 新增：多英雄分配目标，避免重复锁定 ---
-      const lockedTargets = new Set();
-      player.heroes.forEach(hero => {
-        hero._lockedTarget = null;
-        // 找到未被锁定的最近目标
-        const left = hero.rangeLeft();
-        const right = hero.rangeRight();
-        const top = hero.rangeTop();
-        const bottom = hero.rangeBottom();
-        let candidates = enemies.filter(e =>
-          e.visible &&
-          e.position.x > left &&
-          e.position.x < right &&
-          e.position.y > top &&
-          e.position.y < bottom &&
-          !lockedTargets.has(e)
-        );
-        if (candidates.length > 0) {
-          // 距离底部最近
-          let target = candidates.reduce((maxE, e) => (e.position.y > maxE.position.y ? e : maxE), candidates[0]);
-          hero._lockedTarget = target;
-          lockedTargets.add(target);
-        }
-      });
-      player.heroes.forEach(hero => {
-        hero.attack(enemies, bullets, effects);
-      });
-      effects.forEach(eff => {
-        if (eff.type === 'laser') {
-          const hero = eff.hero;
+        spawnWave() {
+          const enemies = [];
+          const count = 5 + (this.currentWave - 1);
+          // 每2波增加基础值1的0%，即血量不再随波次提升，只保留基础值
+          let baseHp = 6;
+          const segments = Math.min(count, 8);
           const now = Date.now();
-          const t = now - eff.start;
-          if (t > eff.duration) return;
-          // tick每200ms
-          if (!eff.lastTick || now - eff.lastTick >= 200) {
-            enemies.forEach(enemy => {
-              const a = eff.from, b = eff.to, p = enemy.position;
-              const abx = b.x - a.x, aby = b.y - a.y;
-              const apx = p.x - a.x, apy = p.y - a.y;
-              const abLen = Math.sqrt(abx*abx + aby*aby);
-              const proj = (apx*abx + apy*aby) / abLen;
-              if (proj < 0 || proj > abLen) return;
-              const closest = {x: a.x + abx * proj/abLen, y: a.y + aby * proj/abLen};
-              const dist = distance(p, closest);
-              if (enemy.visible && dist < eff.width/2 + enemy.radius) {
-                let dmg = hero.laserDamage;
-                enemy.takeDamage(dmg, "laser");
-              }
-            });
-            eff.lastTick = now;
-            eff.tick = (eff.tick||0)+1;
+          const interval = 20000; // 20秒
+          const enemyTypes = ['normal','fast','tank'];
+          for (let i = 0; i < count; i++) {
+            const seg = i % segments;
+            const segWidth = STAGE_WIDTH / segments;
+            const x = segWidth * seg + segWidth/2 + (Math.random()-0.5)*segWidth*0.6;
+            const yBase = 20 + seg * 30;
+            const y = yBase + Math.random()*20 + STAGE_TOP_OFFSET;
+            // 均匀分布在N秒内
+            const appearTime = now + Math.floor(i * interval / count);
+            // 随机类型
+            const type = enemyTypes[Math.floor(Math.random()*enemyTypes.length)];
+            enemies.push(new Enemy(x, y, baseHp, 1, false, appearTime, type));
           }
+          // 特殊大怪分散x/y
+          const bossWaves = [5, 10, 15, 20];
+          if (bossWaves.includes(this.currentWave)) {
+            const bossCount = 1;
+            for (let i = 0; i < bossCount; i++) {
+              let bossHp = 50, bossScale = 1.5;
+              let y = 100 + i * 120 + Math.random()*60 + STAGE_TOP_OFFSET;
+              let x = STAGE_WIDTH/(bossCount+1)*(i+1);
+              if (this.currentWave === 10) { bossHp = 100; bossScale = 2; }
+              if (this.currentWave === 15) { bossHp = 150; bossScale = 2.5; }
+              if (this.currentWave === 20) { bossHp = 200; bossScale = 3; }
+              enemies.push(new Enemy(x, y, bossHp, bossScale, true));
+            }
+          }
+          return enemies;
         }
-      });
-      console.log('before update bullets', bullets.length);
-      bullets.forEach(b => b.update());
-      console.log('after update bullets', bullets.length);
-      bullets = bullets.filter(b => b.active);
-      enemies.forEach(e => e.update(now));
-      // 检查敌人出界扣血
-      enemies.forEach(enemy => {
-        if (!enemy.alive && enemy.position.y > STAGE_HEIGHT) {
-          if (enemy.isBoss) player.life -= 5;
-          else player.life -= 1;
+      }
+
+      // ================== 升级选项生成 ==================
+      function getUpgradeOptions(player) {
+        const options = [];
+        const counts = player.upgradeCounts;
+        const has = type => player.heroes.find(h => h.type === type);
+        if (!has('fire') && !counts['fire_spawn']) options.push({text: '火焰哥出场（范围、伤害）', key: 'fire_spawn'});
+        if (has('fire') && (counts['fire_damage']||0)<10) options.push({text: '火焰哥伤害增加60%', key: 'fire_damage'});
+        if (has('fire') && (counts['fire_explosion']||0)<2) options.push({text: '火焰哥爆炸范围扩大50%', key: 'fire_explosion'});
+        if (!has('laser') && !counts['laser_spawn']) options.push({text: '激光哥出场（直线、伤害）', key: 'laser_spawn'});
+        if (has('laser') && (counts['laser_damage']||0)<10) options.push({text: '激光哥伤害增加60%', key: 'laser_damage'});
+        if (has('laser') && (counts['laser_duration']||0)<2) options.push({text: '激光哥持久输出', key: 'laser_duration'});
+        if (has('laser') && (counts['laser_width']||0)<2) options.push({text: '激光哥光束变粗50%', key: 'laser_width'});
+        if (!has('lightning') && !counts['lightning_spawn']) options.push({text: '打雷哥出场（范围、增伤）', key: 'lightning_spawn'});
+        if (has('lightning') && (counts['lightning_damage']||0)<10) options.push({text: '打雷哥伤害增加60%', key: 'lightning_damage'});
+        if (has('lightning') && (counts['lightning_stun']||0)<2) options.push({text: '打雷哥附带晕眩', key: 'lightning_stun'});
+        if (!has('ice') && !counts['ice_spawn']) options.push({text: '寒冰哥出场（减速、穿透）', key: 'ice_spawn'});
+        if (has('ice') && (counts['ice_damage']||0)<10) options.push({text: '寒冰哥伤害增加60%', key: 'ice_damage'});
+        if (has('ice') && (counts['ice_freeze']||0)<2) options.push({text: '寒冰哥附带冻结', key: 'ice_freeze'});
+        if ((counts['archer_bullet']||0)<2) options.push({text: '射手哥子弹+1', key: 'archer_bullet'});
+        if ((counts['archer_damage']||0)<10) options.push({text: '射手哥伤害增加60%', key: 'archer_damage'});
+        if ((counts['archer_split']||0)<2) options.push({text: '射手哥子弹分裂+1', key: 'archer_split'});
+        return shuffle(options).slice(0, 3);
+      }
+
+      // ================== 升级弹窗（点击式） ==================
+      function showUpgrade(player, isBossReward) {
+        const panel = document.getElementById('upgrade-panel');
+        const optionsDiv = document.getElementById('upgrade-options');
+        optionsDiv.innerHTML = '';
+        // 修改标题
+        const title = panel.querySelector('#upgrade-box h2');
+        if (isBossReward) {
+          title.innerText = 'BOSS奖励';
+        } else {
+          title.innerText = '请选择升级';
         }
+        const options = getUpgradeOptions(player);
+        options.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.className = 'upgrade-btn';
+          btn.innerText = opt.text;
+          btn.onclick = () => {
+            panel.style.display = 'none';
+            player.upgradeCounts[opt.key] = (player.upgradeCounts[opt.key]||0)+1;
+            // 记录升级历史
+            player.upgradeHistory.push({
+              key: opt.key,
+              text: opt.text,
+              time: new Date().toLocaleTimeString()
+            });
+            // 处理升级效果
+            if (opt.key === 'fire_spawn') player.addHero('fire');
+            if (opt.key === 'fire_combo') player.heroes.find(h=>h.type==='fire').fireCombo++;
+            if (opt.key === 'fire_damage') player.heroes.find(h=>h.type==='fire').fireDamageBonus += 0.6;
+            if (opt.key === 'fire_explosion') player.heroes.find(h=>h.type==='fire').fireExplosionBonus += 0.5;
+            if (opt.key === 'laser_spawn') player.addHero('laser');
+            if (opt.key === 'laser_damage') player.heroes.find(h=>h.type==='laser').laserDamage *= 1.6;
+            if (opt.key === 'laser_duration') player.heroes.find(h=>h.type==='laser').laserDurationBonus += 0.5;
+            if (opt.key === 'laser_width') player.heroes.find(h=>h.type==='laser').laserWidthBonus += 0.5;
+            if (opt.key === 'lightning_spawn') player.addHero('lightning');
+            if (opt.key === 'lightning_damage') player.heroes.find(h=>h.type==='lightning').lightningDamageBonus += 0.6;
+            if (opt.key === 'lightning_combo') player.heroes.find(h=>h.type==='lightning').lightningCombo++;
+            if (opt.key === 'lightning_stun') player.heroes.find(h=>h.type==='lightning').lightningStun++;
+            if (opt.key === 'ice_spawn') player.addHero('ice');
+            if (opt.key === 'ice_damage') player.heroes.find(h=>h.type==='ice').iceDamageBonus += 0.6;
+            if (opt.key === 'ice_combo') player.heroes.find(h=>h.type==='ice').iceCombo++;
+            if (opt.key === 'ice_freeze') player.heroes.find(h=>h.type==='ice').iceFreeze++;
+            if (opt.key === 'archer_bullet') player.heroes.find(h=>h.type==='archer').bulletCount++;
+            if (opt.key === 'archer_damage') player.heroes.find(h=>h.type==='archer').damage *= 1.6;
+            if (opt.key === 'archer_split') player.heroes.find(h=>h.type==='archer').bulletSplit++;
+          };
+          optionsDiv.appendChild(btn);
+        });
+        panel.style.display = 'flex';
+      }
+
+      // ================== 攻击范围显示控制 ==================
+      let selectedHeroIdx = null;
+
+      // canvas内icon参数
+      const iconPause = { x: STAGE_WIDTH-38, y: 100, r: 22 };
+      const iconSpeed = { x: STAGE_WIDTH-38, y: 156, r: 22 };
+
+      // 工具函数：判断点是否在圆内
+      function inCircle(mx, my, cx, cy, r) {
+        return (mx-cx)*(mx-cx)+(my-cy)*(my-cy) <= r*r;
+      }
+
+      // 事件监听 passive 兼容
+      let supportsPassive = false;
+      try {
+        window.addEventListener("test", null, Object.defineProperty({}, 'passive', {
+          get: function() { supportsPassive = true; }
+        }));
+      } catch(e) {}
+
+      // 修复：PC端click事件
+      canvas.addEventListener('click', function(e) {
+        const rect = canvas.getBoundingClientRect();
+        // 适配高分屏canvas缩放
+        const mx = (e.clientX - rect.left) * (canvas.width / canvas.offsetWidth);
+        const my = (e.clientY - rect.top) * (canvas.height / canvas.offsetHeight);
+        // 先判断icon
+        if (inCircle(mx, my, iconPause.x, iconPause.y, iconPause.r)) {
+          paused = !paused;
+          // 同步页面按钮
+          if (paused) {
+            pauseBtn.style.background = '#6cf';
+            pauseBtn.style.color = '#222';
+            pauseBtn.innerText = '继续';
+          } else {
+            pauseBtn.style.background = '#444';
+            pauseBtn.style.color = '#fff';
+            pauseBtn.innerText = '暂停';
+            requestAnimationFrame(gameLoop);
+          }
+          return;
+        }
+        if (inCircle(mx, my, iconSpeed.x, iconSpeed.y, iconSpeed.r)) {
+          if (speedMultiplier === 1) {
+            speedMultiplier = 2;
+            speedBtn.style.background = '#6cf';
+            speedBtn.style.color = '#222';
+            speedBtn.innerText = '1倍速';
+          } else {
+            speedMultiplier = 1;
+            speedBtn.style.background = '#444';
+            speedBtn.style.color = '#fff';
+            speedBtn.innerText = '2倍速';
+          }
+          return;
+        }
+        // 英雄选中逻辑
+        let found = false;
+        player.heroes.forEach((hero, idx) => {
+          const dx = mx - hero.position.x * (canvas.width / canvas.offsetWidth);
+          const dy = my - hero.position.y * (canvas.height / canvas.offsetHeight);
+          if (dx*dx + dy*dy <= 22*22) {
+            if (selectedHeroIdx === idx) {
+              selectedHeroIdx = null;
+            } else {
+              selectedHeroIdx = idx;
+            }
+            found = true;
+          }
+        });
+        if (!found) selectedHeroIdx = null;
       });
-      enemies = enemies.filter(e => e.alive && e.hp > 0);
-      bullets.forEach(bullet => {
-        enemies.forEach((enemy, idx) => {
-          if (enemy.alive && enemy.visible && bullet.active && !bullet.hitEnemies.has(enemy)) {
-            // 分裂子弹不能命中原目标
-            if (bullet.excludeTarget && bullet.excludeTarget === enemy) return;
-            const dx = bullet.position.x - enemy.position.x;
-            const dy = bullet.position.y - enemy.position.y;
-            // 新增：速度型敌人判定半径加大
-            let enemyRadius = enemy.radius;
-            if (enemy.type === 'fast') enemyRadius += 4;
-            const dist = Math.sqrt(dx*dx + dy*dy);
-            if (dist < bullet.radius + enemyRadius) {
-              bullet.hitEnemies.add(enemy);
-              if (bullet.type === "fireball") {
-                // 爆炸：以命中目标为圆心，爆炸半径为3x敌人半径
-                const explosionRadius = enemy.radius * 3;
-                effects.push({type: "explosion-area", x: enemy.position.x, y: enemy.position.y, r: explosionRadius, start: Date.now(), duration: 200});
-                enemies.forEach(e2 => {
-                  if (e2.alive && distance(e2.position, enemy.position) <= explosionRadius) {
-                    e2.takeDamage(bullet.damage, "fire");
-                    // 在爆炸/引燃处，设置burnDps为火焰哥伤害的0.1倍，持续3秒
-                    // 找到火焰哥
-                    const fireHero = player.heroes.find(h=>h.type==='fire');
-                    if (fireHero) {
-                      if (!e2.isBoss) {
-                        e2.burnUntil = Date.now() + 3000;
-                        e2.burnDps = Math.max(1, fireHero.damage * (1 + fireHero.fireDamageBonus) * 0.1);
-                      }
-                    }
-                  }
-                });
-                bullet.active = false;
-              } else if (bullet.type === "ice") {
-                enemy.takeDamage(bullet.damage, "ice");
-                if (!enemy.isBoss) enemy.slowUntil = Date.now() + 2000;
-                if (!enemy.isBoss && bullet.freeze) enemy.frozenUntil = Date.now() + 1000 * bullet.freeze;
-                effects.push({type: "ice-effect", target: enemy, start: Date.now(), duration: 400});
-                bullet.pierce--;
-                if (bullet.pierce <= 0) bullet.active = false;
-              } else if (bullet.type === "arrow") {
-                enemy.takeDamage(bullet.damage, "archer", "", bullet.comboIdx);
-                // 子弹碰撞部分，分裂子弹生成：
-                if (bullet.split > 0 && bullet.bulletSplitTimes < 2) {
-                  let usedTargets = new Set([enemy]);
-                  for (let s = 0; s < bullet.split; s++) {
-                    let minDist = Infinity;
-                    let nearest = null;
-                    enemies.forEach(e2 => {
-                      if (e2.alive && !usedTargets.has(e2)) {
-                        const d = Math.sqrt((e2.position.x - enemy.position.x) ** 2 + (e2.position.y - enemy.position.y) ** 2);
-                        if (d < minDist) {
-                          minDist = d;
-                          nearest = e2;
+      // 移动端touch事件
+      canvas.addEventListener('touchstart', function(e) {
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        const mx = (touch.clientX - rect.left) * (canvas.width / canvas.offsetWidth);
+        const my = (touch.clientY - rect.top) * (canvas.height / canvas.offsetHeight);
+        // 先判断icon
+        if (inCircle(mx, my, iconPause.x, iconPause.y, iconPause.r)) {
+          paused = !paused;
+          if (paused) {
+            pauseBtn.style.background = '#6cf';
+            pauseBtn.style.color = '#222';
+            pauseBtn.innerText = '继续';
+          } else {
+            pauseBtn.style.background = '#444';
+            pauseBtn.style.color = '#fff';
+            pauseBtn.innerText = '暂停';
+            requestAnimationFrame(gameLoop);
+          }
+          e.preventDefault();
+          return;
+        }
+        if (inCircle(mx, my, iconSpeed.x, iconSpeed.y, iconSpeed.r)) {
+          if (speedMultiplier === 1) {
+            speedMultiplier = 2;
+            speedBtn.style.background = '#6cf';
+            speedBtn.style.color = '#222';
+            speedBtn.innerText = '1倍速';
+          } else {
+            speedMultiplier = 1;
+            speedBtn.style.background = '#444';
+            speedBtn.style.color = '#fff';
+            speedBtn.innerText = '2倍速';
+          }
+          e.preventDefault();
+          return;
+        }
+        // 英雄选中逻辑
+        let found = false;
+        player.heroes.forEach((hero, idx) => {
+          const dx = mx - hero.position.x * (canvas.width / canvas.offsetWidth);
+          const dy = my - hero.position.y * (canvas.height / canvas.offsetHeight);
+          if (dx*dx + dy*dy <= 22*22) {
+            if (selectedHeroIdx === idx) {
+              selectedHeroIdx = null;
+            } else {
+              selectedHeroIdx = idx;
+            }
+            found = true;
+          }
+        });
+        if (!found) selectedHeroIdx = null;
+        e.preventDefault();
+      }, supportsPassive ? {passive: false} : false);
+
+      // ================== 游戏主循环 ==================
+      const player = new Player();
+      const waveManager = new WaveManager();
+      let enemies = waveManager.spawnWave();
+      let bullets = [];
+      let effects = [];
+      let lastWaveTime = Date.now();
+      let lastAutoWaveTime = Date.now();
+
+      // 修复刷怪逻辑，避免多波同时生成
+      let wavePending = false;
+      let nextWaveTime = 0;
+      let gameStarted = false;
+      let gameStartTime = 0;
+      let gameOver = false;
+
+      // 开始游戏按钮逻辑，currentWave初始化为0，点击后设为1并生成第一波
+      const startBtn = document.getElementById('start-btn');
+      const startScreen = document.getElementById('start-screen');
+      startBtn.onclick = function() {
+        startScreen.style.display = 'none';
+        gameStarted = true;
+        waveManager.currentWave = 0;
+        player.updateExpThreshold();
+        player.killCount = 0;
+        waveManager.nextWave();
+        enemies = waveManager.spawnWave();
+        wavePending = true;
+        nextWaveTime = Date.now() + 10000;
+        gameStartTime = Date.now();
+        fixCanvasDpi(canvas); // 确保参数同步
+        requestAnimationFrame(gameLoop); // 确保主循环启动
+      }
+      // 2倍速控制
+      let speedMultiplier = 1;
+      const speedBtn = document.getElementById('speed-btn');
+      speedBtn.onclick = function() {
+        if (speedMultiplier === 1) {
+          speedMultiplier = 2;
+          speedBtn.style.background = '#6cf';
+          speedBtn.style.color = '#222';
+          speedBtn.innerText = '1倍速';
+        } else {
+          speedMultiplier = 1;
+          speedBtn.style.background = '#444';
+          speedBtn.style.color = '#fff';
+          speedBtn.innerText = '2倍速';
+        }
+      }
+      // 暂停功能
+      let paused = false;
+      const pauseBtn = document.getElementById('pause-btn');
+      pauseBtn.onclick = function() {
+        paused = !paused;
+        if (paused) {
+          pauseBtn.style.background = '#6cf';
+          pauseBtn.style.color = '#222';
+          pauseBtn.innerText = '继续';
+        } else {
+          pauseBtn.style.background = '#444';
+          pauseBtn.style.color = '#fff';
+          pauseBtn.innerText = '暂停';
+          requestAnimationFrame(gameLoop);
+        }
+      }
+      let lastGameNow = Date.now();
+      function gameLoop() {
+        requestAnimationFrame(gameLoop);
+        let now;
+        if (paused || document.getElementById('upgrade-panel').style.display === 'flex' || gameOver) {
+          now = lastGameNow;
+          draw(now);
+          return;
+        } else {
+          now = Date.now();
+          lastGameNow = now;
+        }
+        if (!gameStarted) {
+          draw(now);
+          return;
+        }
+        // --- 新增：数组上限，防止溢出 ---
+        const MAX_ENEMIES = 500, MAX_BULLETS = 500, MAX_EFFECTS = 500;
+        if (enemies.length > MAX_ENEMIES) enemies = enemies.slice(enemies.length - MAX_ENEMIES);
+        if (bullets.length > MAX_BULLETS) bullets = bullets.slice(bullets.length - MAX_BULLETS);
+        if (effects.length > MAX_EFFECTS) effects = effects.slice(effects.length - MAX_EFFECTS);
+        // ---
+        // --- 新增：多英雄分配目标，避免重复锁定 ---
+        const lockedTargets = new Set();
+        player.heroes.forEach(hero => {
+          hero._lockedTarget = null;
+          // 找到未被锁定的最近目标
+          const left = hero.rangeLeft();
+          const right = hero.rangeRight();
+          const top = hero.rangeTop();
+          const bottom = hero.rangeBottom();
+          let candidates = enemies.filter(e =>
+            e.visible &&
+            e.position.x > left &&
+            e.position.x < right &&
+            e.position.y > top &&
+            e.position.y < bottom &&
+            !lockedTargets.has(e)
+          );
+          if (candidates.length > 0) {
+            // 距离底部最近
+            let target = candidates.reduce((maxE, e) => (e.position.y > maxE.position.y ? e : maxE), candidates[0]);
+            hero._lockedTarget = target;
+            lockedTargets.add(target);
+          }
+        });
+        player.heroes.forEach(hero => {
+          hero.attack(enemies, bullets, effects);
+        });
+        effects.forEach(eff => {
+          if (eff.type === 'laser') {
+            const hero = eff.hero;
+            const now = Date.now();
+            const t = now - eff.start;
+            if (t > eff.duration) return;
+            // tick每200ms
+            if (!eff.lastTick || now - eff.lastTick >= 200) {
+              enemies.forEach(enemy => {
+                const a = eff.from, b = eff.to, p = enemy.position;
+                const abx = b.x - a.x, aby = b.y - a.y;
+                const apx = p.x - a.x, apy = p.y - a.y;
+                const abLen = Math.sqrt(abx*abx + aby*aby);
+                const proj = (apx*abx + apy*aby) / abLen;
+                if (proj < 0 || proj > abLen) return;
+                const closest = {x: a.x + abx * proj/abLen, y: a.y + aby * proj/abLen};
+                const dist = distance(p, closest);
+                if (enemy.visible && dist < eff.width/2 + enemy.radius) {
+                  let dmg = hero.laserDamage;
+                  enemy.takeDamage(dmg, "laser");
+                }
+              });
+              eff.lastTick = now;
+              eff.tick = (eff.tick||0)+1;
+            }
+          }
+        });
+        console.log('before update bullets', bullets.length);
+        bullets.forEach(b => b.update());
+        console.log('after update bullets', bullets.length);
+        bullets = bullets.filter(b => b.active);
+        enemies.forEach(e => e.update(now));
+        // 检查敌人出界扣血
+        enemies.forEach(enemy => {
+          if (!enemy.alive && enemy.position.y > STAGE_HEIGHT) {
+            if (enemy.isBoss) player.life -= 5;
+            else player.life -= 1;
+          }
+        });
+        enemies = enemies.filter(e => e.alive && e.hp > 0);
+        bullets.forEach(bullet => {
+          enemies.forEach((enemy, idx) => {
+            if (enemy.alive && enemy.visible && bullet.active && !bullet.hitEnemies.has(enemy)) {
+              // 分裂子弹不能命中原目标
+              if (bullet.excludeTarget && bullet.excludeTarget === enemy) return;
+              const dx = bullet.position.x - enemy.position.x;
+              const dy = bullet.position.y - enemy.position.y;
+              // 新增：速度型敌人判定半径加大
+              let enemyRadius = enemy.radius;
+              if (enemy.type === 'fast') enemyRadius += 4;
+              const dist = Math.sqrt(dx*dx + dy*dy);
+              if (dist < bullet.radius + enemyRadius) {
+                bullet.hitEnemies.add(enemy);
+                if (bullet.type === "fireball") {
+                  // 爆炸：以命中目标为圆心，爆炸半径为3x敌人半径
+                  const explosionRadius = enemy.radius * 3;
+                  effects.push({type: "explosion-area", x: enemy.position.x, y: enemy.position.y, r: explosionRadius, start: Date.now(), duration: 200});
+                  enemies.forEach(e2 => {
+                    if (e2.alive && distance(e2.position, enemy.position) <= explosionRadius) {
+                      e2.takeDamage(bullet.damage, "fire");
+                      // 在爆炸/引燃处，设置burnDps为火焰哥伤害的0.1倍，持续3秒
+                      // 找到火焰哥
+                      const fireHero = player.heroes.find(h=>h.type==='fire');
+                      if (fireHero) {
+                        if (!e2.isBoss) {
+                          e2.burnUntil = Date.now() + 3000;
+                          e2.burnDps = Math.max(1, fireHero.damage * (1 + fireHero.fireDamageBonus) * 0.1);
                         }
                       }
-                    });
-                    let angle;
-                    if (nearest) {
-                      angle = Math.atan2(nearest.position.y - enemy.position.y, nearest.position.x - enemy.position.x);
-                      usedTargets.add(nearest);
-                    } else {
-                      angle = Math.random() * Math.PI * 2;
                     }
-                    // 分裂次数达到2时，分裂子弹有0.5s间隔
-                    if (bullet.bulletSplitTimes >= 1) {
-                      setTimeout(() => {
+                  });
+                  bullet.active = false;
+                } else if (bullet.type === "ice") {
+                  enemy.takeDamage(bullet.damage, "ice");
+                  if (!enemy.isBoss) enemy.slowUntil = Date.now() + 2000;
+                  if (!enemy.isBoss && bullet.freeze) enemy.frozenUntil = Date.now() + 1000 * bullet.freeze;
+                  effects.push({type: "ice-effect", target: enemy, start: Date.now(), duration: 400});
+                  bullet.pierce--;
+                  if (bullet.pierce <= 0) bullet.active = false;
+                } else if (bullet.type === "arrow") {
+                  enemy.takeDamage(bullet.damage, "archer", "", bullet.comboIdx);
+                  // 子弹碰撞部分，分裂子弹生成：
+                  if (bullet.split > 0 && bullet.bulletSplitTimes < 2) {
+                    let usedTargets = new Set([enemy]);
+                    for (let s = 0; s < bullet.split; s++) {
+                      let minDist = Infinity;
+                      let nearest = null;
+                      enemies.forEach(e2 => {
+                        if (e2.alive && !usedTargets.has(e2)) {
+                          const d = Math.sqrt((e2.position.x - enemy.position.x) ** 2 + (e2.position.y - enemy.position.y) ** 2);
+                          if (d < minDist) {
+                            minDist = d;
+                            nearest = e2;
+                          }
+                        }
+                      });
+                      let angle;
+                      if (nearest) {
+                        angle = Math.atan2(nearest.position.y - enemy.position.y, nearest.position.x - enemy.position.x);
+                        usedTargets.add(nearest);
+                      } else {
+                        angle = Math.random() * Math.PI * 2;
+                      }
+                      // 分裂次数达到2时，分裂子弹有0.5s间隔
+                      if (bullet.bulletSplitTimes >= 1) {
+                        setTimeout(() => {
+                          const newBullet = new Bullet(
+                            {x: enemy.position.x, y: enemy.position.y},
+                            angle,
+                            10,
+                            bullet.damage * 0.5,
+                            "arrow",
+                            1,
+                            bullet.heroType,
+                            0,
+                            0,
+                            0,
+                            enemy, // excludeTarget: 原目标
+                            bullet.comboIdx
+                          );
+                          newBullet.bulletSplitTimes = bullet.bulletSplitTimes + 1;
+                          bullets.push(newBullet);
+                        }, s * 500 / speedMultiplier);
+                      } else {
                         const newBullet = new Bullet(
                           {x: enemy.position.x, y: enemy.position.y},
                           angle,
@@ -1302,904 +1319,887 @@
                         );
                         newBullet.bulletSplitTimes = bullet.bulletSplitTimes + 1;
                         bullets.push(newBullet);
-                      }, s * 500 / speedMultiplier);
-                    } else {
-                      const newBullet = new Bullet(
-                        {x: enemy.position.x, y: enemy.position.y},
-                        angle,
-                        10,
-                        bullet.damage * 0.5,
-                        "arrow",
-                        1,
-                        bullet.heroType,
-                        0,
-                        0,
-                        0,
-                        enemy, // excludeTarget: 原目标
-                        bullet.comboIdx
-                      );
-                      newBullet.bulletSplitTimes = bullet.bulletSplitTimes + 1;
-                      bullets.push(newBullet);
+                      }
                     }
                   }
+                  bullet.active = false;
                 }
-                bullet.active = false;
-              }
-              if (enemy.hp <= 0) {
-                enemy.alive = false;
-                player.killCount++;
-                // 经验获取
-                if (enemy.isBoss) {
-                  // 怪物直接升1级
-                  player.exp = 0;
-                  player.level++;
-                  player.updateExpThreshold();
-                  showUpgrade(player, true);
-                } else {
-                  player.gainExp(1);
+                if (enemy.hp <= 0) {
+                  enemy.alive = false;
+                  player.killCount++;
+                  // 经验获取
+                  if (enemy.isBoss) {
+                    // 怪物直接升1级
+                    player.exp = 0;
+                    player.level++;
+                    player.updateExpThreshold();
+                    showUpgrade(player, true);
+                  } else {
+                    player.gainExp(1);
+                  }
                 }
               }
             }
-          }
+          });
         });
-      });
-      // 刷怪逻辑（每20秒一波）
-      if (!wavePending && Date.now() >= nextWaveTime) {
-        if (waveManager.currentWave < waveManager.totalWaves) {
-          waveManager.nextWave();
-          player.updateExpThreshold();
-          player.killCount = 0;
-          enemies = enemies.concat(waveManager.spawnWave());
+        // 刷怪逻辑（每20秒一波）
+        if (!wavePending && Date.now() >= nextWaveTime) {
+          if (waveManager.currentWave < waveManager.totalWaves) {
+            waveManager.nextWave();
+            player.updateExpThreshold();
+            player.killCount = 0;
+            enemies = enemies.concat(waveManager.spawnWave());
+            wavePending = true;
+            nextWaveTime = Date.now() + 20000 / speedMultiplier;
+          }
+        }
+        if (wavePending) {
+          wavePending = false;
+        }
+        // 第一波特殊处理：2秒后生成
+        if (waveManager.currentWave === 1 && enemies.length === 0 && Date.now() >= nextWaveTime) {
+            enemies = waveManager.spawnWave();
           wavePending = true;
-          nextWaveTime = Date.now() + 20000 / speedMultiplier;
+          nextWaveTime = Date.now() + (10000 + Math.random() * 5000);
+        }
+        draw(now);
+        effects = effects.filter(eff => Date.now() - eff.start < eff.duration);
+        bullets = bullets.filter(b => b.active);
+        // 游戏胜利判定
+        if (waveManager.currentWave === waveManager.totalWaves && enemies.length === 0 && !gameOver) {
+          showGameOverPanel('win');
+          return;
+        }
+        // 游戏失败判定
+        if (player.life <= 0 && !gameOver) {
+          showGameOverPanel('fail');
+          return;
         }
       }
-      if (wavePending) {
-        wavePending = false;
-      }
-      // 第一波特殊处理：2秒后生成
-      if (waveManager.currentWave === 1 && enemies.length === 0 && Date.now() >= nextWaveTime) {
-          enemies = waveManager.spawnWave();
-        wavePending = true;
-        nextWaveTime = Date.now() + (10000 + Math.random() * 5000);
-      }
-      draw(now);
-      effects = effects.filter(eff => Date.now() - eff.start < eff.duration);
-      bullets = bullets.filter(b => b.active);
-      // 游戏胜利判定
-      if (waveManager.currentWave === waveManager.totalWaves && enemies.length === 0 && !gameOver) {
-        showGameOverPanel('win');
-        return;
-      }
-      // 游戏失败判定
-      if (player.life <= 0 && !gameOver) {
-        showGameOverPanel('fail');
-        return;
-      }
-    }
 
-    function drawFlame(ctx, x, y, scale=1) {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.scale(scale, scale);
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.bezierCurveTo(-8, -16, -12, -36, 0, -48);
-      ctx.bezierCurveTo(12, -36, 8, -16, 0, 0);
-      ctx.closePath();
-      const grad = ctx.createLinearGradient(0, 0, 0, -48);
-      grad.addColorStop(0, "orange");
-      grad.addColorStop(0.5, "#ff0");
-      grad.addColorStop(1, "#fff");
-      ctx.fillStyle = grad;
-      ctx.shadowColor = "#ff0";
-      ctx.shadowBlur = 18;
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(-6, -10);
-      ctx.bezierCurveTo(-10, -18, -8, -28, -2, -32);
-      ctx.bezierCurveTo(-2, -28, -4, -18, -6, -10);
-      ctx.closePath();
-      ctx.fillStyle = "#ffb300";
-      ctx.shadowBlur = 0;
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(6, -10);
-      ctx.bezierCurveTo(10, -18, 8, -28, 2, -32);
-      ctx.bezierCurveTo(2, -28, 4, -18, 6, -10);
-      ctx.closePath();
-      ctx.fillStyle = "#ffd700";
-      ctx.fill();
-      ctx.restore();
-    }
-    function drawIceEffect(ctx, x, y, scale=1) {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.scale(scale, scale);
-      ctx.beginPath();
-      ctx.arc(0, 0, 26, 0, Math.PI*2);
-      ctx.strokeStyle = "#aef6ff";
-      ctx.lineWidth = 4;
-      ctx.setLineDash([6, 4]);
-      ctx.globalAlpha = 0.7;
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.globalAlpha = 1;
-      ctx.strokeStyle = "#e0f7fa";
-      ctx.lineWidth = 2;
-      for(let i=0;i<6;i++){
+      function drawFlame(ctx, x, y, scale=1) {
         ctx.save();
-        ctx.rotate(Math.PI/3*i);
+        ctx.translate(x, y);
+        ctx.scale(scale, scale);
         ctx.beginPath();
-        ctx.moveTo(0,0);
-        ctx.lineTo(0,-18);
-        ctx.stroke();
+        ctx.moveTo(0, 0);
+        ctx.bezierCurveTo(-8, -16, -12, -36, 0, -48);
+        ctx.bezierCurveTo(12, -36, 8, -16, 0, 0);
+        ctx.closePath();
+        const grad = ctx.createLinearGradient(0, 0, 0, -48);
+        grad.addColorStop(0, "orange");
+        grad.addColorStop(0.5, "#ff0");
+        grad.addColorStop(1, "#fff");
+        ctx.fillStyle = grad;
+        ctx.shadowColor = "#ff0";
+        ctx.shadowBlur = 18;
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(-6, -10);
+        ctx.bezierCurveTo(-10, -18, -8, -28, -2, -32);
+        ctx.bezierCurveTo(-2, -28, -4, -18, -6, -10);
+        ctx.closePath();
+        ctx.fillStyle = "#ffb300";
+        ctx.shadowBlur = 0;
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(6, -10);
+        ctx.bezierCurveTo(10, -18, 8, -28, 2, -32);
+        ctx.bezierCurveTo(2, -28, 4, -18, 6, -10);
+        ctx.closePath();
+        ctx.fillStyle = "#ffd700";
+        ctx.fill();
         ctx.restore();
       }
-      ctx.restore();
-    }
-
-    // ================== 渲染函数 ==================
-    function drawHeroIcon(ctx, hero) {
+      function drawIceEffect(ctx, x, y, scale=1) {
         ctx.save();
-      ctx.translate(hero.position.x, hero.position.y);
-      switch(hero.type) {
-        case 'archer':
-          // 射手哥：弓和箭
-          ctx.strokeStyle = '#fff';
-          ctx.lineWidth = 3;
+        ctx.translate(x, y);
+        ctx.scale(scale, scale);
         ctx.beginPath();
-          ctx.arc(0, 0, 18, Math.PI*0.7, Math.PI*1.3, false);
-          ctx.stroke();
-          ctx.beginPath();
-          ctx.moveTo(-8, -10); ctx.lineTo(12, 0); ctx.stroke();
-          ctx.beginPath();
-          ctx.moveTo(12, 0); ctx.lineTo(8, -4); ctx.moveTo(12, 0); ctx.lineTo(8, 4); ctx.stroke();
-          break;
-        case 'laser':
-          // 激光哥：头盔+护目镜
-          ctx.fillStyle = '#ffe066';
-          ctx.beginPath();
-          ctx.ellipse(0, 0, 16, 18, 0, 0, Math.PI*2);
-        ctx.fill();
-          ctx.fillStyle = '#222';
-          ctx.fillRect(-10, -4, 20, 8);
-        ctx.strokeStyle = '#fff';
-          ctx.lineWidth = 2;
-          ctx.strokeRect(-10, -4, 20, 8);
-          break;
-        case 'fire':
-          // 火焰哥：火焰头，整体向下偏移12像素以底部对齐
-          drawFlame(ctx, 0, 12, 0.7);
-          break;
-        case 'ice':
-          // 寒冰哥：雪花头
-          ctx.strokeStyle = '#00e0ff';
-          ctx.lineWidth = 3;
-          for(let i=0;i<6;i++){
-            ctx.save();
-            ctx.rotate(Math.PI/3*i);
-            ctx.beginPath();
-            ctx.moveTo(0,0); ctx.lineTo(0,-16); ctx.stroke();
-            ctx.restore();
-          }
-          ctx.beginPath();
-          ctx.arc(0,0,7,0,Math.PI*2);
+        ctx.arc(0, 0, 26, 0, Math.PI*2);
+        ctx.strokeStyle = "#aef6ff";
+        ctx.lineWidth = 4;
+        ctx.setLineDash([6, 4]);
+        ctx.globalAlpha = 0.7;
         ctx.stroke();
-          break;
-        case 'lightning':
-          // 打雷哥：闪电头
-          ctx.strokeStyle = '#fff700';
-          ctx.lineWidth = 4;
-          ctx.beginPath();
-          ctx.moveTo(-8,-12); ctx.lineTo(0,0); ctx.lineTo(-4,0); ctx.lineTo(8,12); ctx.stroke();
-          break;
-      }
-      ctx.restore();
-    }
-    function drawBullet(ctx, bullet) {
-      ctx.save();
-      switch (bullet.type) {
-        case 'arrow': {
-          // 射手哥：白色带蓝描边箭头，带拖尾
+        ctx.setLineDash([]);
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = "#e0f7fa";
+        ctx.lineWidth = 2;
+        for(let i=0;i<6;i++){
           ctx.save();
-          ctx.translate(bullet.position.x, bullet.position.y);
-          ctx.rotate(Math.atan2(bullet.velocity.y, bullet.velocity.x));
-          // 拖尾
-          let grad = ctx.createLinearGradient(-18, 0, 8, 0);
-          grad.addColorStop(0, 'rgba(108,207,255,0.2)');
-          grad.addColorStop(1, 'rgba(255,255,255,0)');
-          ctx.fillStyle = grad;
+          ctx.rotate(Math.PI/3*i);
           ctx.beginPath();
-          ctx.moveTo(-18, -3); ctx.lineTo(8, -1); ctx.lineTo(8, 1); ctx.lineTo(-18, 3); ctx.closePath();
-          ctx.fill();
-          // 箭头主体
-          ctx.strokeStyle = '#6cf';
-          ctx.lineWidth = 2;
-          ctx.fillStyle = '#fff';
-          ctx.beginPath();
-          ctx.moveTo(8, 0); ctx.lineTo(-8, -5); ctx.lineTo(-8, 5); ctx.closePath();
-          ctx.fill(); ctx.stroke();
-          ctx.restore();
-          break;
-        }
-        case 'fireball': {
-          // 火焰哥：橙红火球，发光，拖尾
-          ctx.save();
-          ctx.globalAlpha = 0.92;
-          let grad = ctx.createRadialGradient(bullet.position.x, bullet.position.y, 0, bullet.position.x, bullet.position.y, 16);
-          grad.addColorStop(0, '#fffbe0');
-          grad.addColorStop(0.2, '#ffb347');
-          grad.addColorStop(0.7, '#ff9800');
-          grad.addColorStop(1, '#a85600');
-          ctx.shadowColor = '#ff9800';
-          ctx.shadowBlur = 18;
-          ctx.beginPath();
-          ctx.arc(bullet.position.x, bullet.position.y, 13, 0, Math.PI*2);
-          ctx.fillStyle = grad;
-          ctx.fill();
-          // 拖尾
-          ctx.globalAlpha = 0.4;
-          ctx.beginPath();
-          ctx.ellipse(bullet.position.x-18*Math.cos(Math.atan2(bullet.velocity.y, bullet.velocity.x)), bullet.position.y-18*Math.sin(Math.atan2(bullet.velocity.y, bullet.velocity.x)), 10, 4, Math.atan2(bullet.velocity.y, bullet.velocity.x), 0, Math.PI*2);
-          ctx.fillStyle = '#ffb347';
-          ctx.fill();
-          ctx.restore();
-          break;
-        }
-        case 'ice': {
-          // 寒冰哥：冰蓝六边形/雪花弹，发光，拖尾
-          ctx.save();
-          ctx.translate(bullet.position.x, bullet.position.y);
-          ctx.rotate(Math.atan2(bullet.velocity.y, bullet.velocity.x));
-          ctx.shadowColor = '#00e0ff';
-          ctx.shadowBlur = 12;
-          ctx.strokeStyle = '#aef6ff';
-          ctx.lineWidth = 2.5;
-          ctx.beginPath();
-          for(let i=0;i<6;i++){
-            let angle = Math.PI/3*i;
-            let x = Math.cos(angle)*9, y = Math.sin(angle)*9;
-            if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-          }
-          ctx.closePath();
-          ctx.stroke();
-          ctx.beginPath();
-          ctx.arc(0,0,4,0,Math.PI*2);
-          ctx.fillStyle = '#b3e6ff';
-          ctx.fill();
-          // 拖尾
-          ctx.globalAlpha = 0.3;
-          ctx.beginPath();
-          ctx.ellipse(-14, 0, 7, 3, 0, 0, Math.PI*2);
-          ctx.fillStyle = '#aef6ff';
-          ctx.fill();
-          ctx.restore();
-          break;
-        }
-        case 'laser': {
-          // 激光哥：激光头部亮点（柔和版）
-          ctx.save();
-          ctx.globalAlpha = 0.45;
-          ctx.beginPath();
-          ctx.arc(bullet.position.x, bullet.position.y, 10, 0, Math.PI*2);
-          ctx.fillStyle = '#ffe066';
-          ctx.shadowColor = '#ffe066';
-          ctx.shadowBlur = 6;
-          ctx.fill();
-          ctx.restore();
-          break;
-        }
-        case 'lightning': {
-          // 打雷哥：锯齿状闪电弹，发光
-          ctx.save();
-          ctx.translate(bullet.position.x, bullet.position.y);
-          ctx.rotate(Math.atan2(bullet.velocity.y, bullet.velocity.x));
-          ctx.strokeStyle = '#fff700';
-          ctx.lineWidth = 4;
-          ctx.shadowColor = '#fff700';
-          ctx.shadowBlur = 12;
-          ctx.beginPath();
-          ctx.moveTo(-8, 0);
-          ctx.lineTo(-4, -6);
-          ctx.lineTo(0, 0);
-          ctx.lineTo(4, 6);
-          ctx.lineTo(8, 0);
+          ctx.moveTo(0,0);
+          ctx.lineTo(0,-18);
           ctx.stroke();
           ctx.restore();
-          break;
         }
-        default: {
-          // 兜底：白色圆点
-          ctx.fillStyle = "#fff";
-          ctx.beginPath();
-          ctx.arc(bullet.position.x, bullet.position.y, 8, 0, Math.PI * 2);
-          ctx.fill();
-        }
+        ctx.restore();
       }
-      ctx.restore();
-    }
-    // 1. drawHeartIcon函数
-    function drawHeartIcon(ctx, x, y, r, value) {
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(x, y + r * 0.3);
-      ctx.bezierCurveTo(x - r, y - r * 0.4, x - r, y + r * 0.8, x, y + r);
-      ctx.bezierCurveTo(x + r, y + r * 0.8, x + r, y - r * 0.4, x, y + r * 0.3);
-      ctx.closePath();
-      ctx.fillStyle = '#ff5a5a';
-      ctx.shadowColor = '#f88';
-      ctx.shadowBlur = 8;
-      ctx.fill();
-      ctx.shadowBlur = 0;
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      ctx.font = 'bold 18px Arial';
-      ctx.fillStyle = '#fff';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(value, x, y + r * 0.35);
-      ctx.restore();
-    }
-    function draw(now) {
-      // 画布缩放适配，保证每帧都完整显示
-      fixCanvasDpi(canvas);
-      // 等比缩放，内容不拉伸
-      const scale = Math.min(canvas.width / STAGE_WIDTH, canvas.height / STAGE_HEIGHT);
-      ctx.setTransform(scale, 0, 0, scale, 0, 0);
-      ctx.clearRect(0, 0, STAGE_WIDTH, STAGE_HEIGHT);
-      player.heroes.forEach((hero, idx) => {
-        drawHeroIcon(ctx, hero);
+
+      // ================== 渲染函数 ==================
+      function drawHeroIcon(ctx, hero) {
+          ctx.save();
+        ctx.translate(hero.position.x, hero.position.y);
+        switch(hero.type) {
+          case 'archer':
+            // 射手哥：弓和箭
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 3;
+          ctx.beginPath();
+            ctx.arc(0, 0, 18, Math.PI*0.7, Math.PI*1.3, false);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(-8, -10); ctx.lineTo(12, 0); ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(12, 0); ctx.lineTo(8, -4); ctx.moveTo(12, 0); ctx.lineTo(8, 4); ctx.stroke();
+            break;
+          case 'laser':
+            // 激光哥：头盔+护目镜
+            ctx.fillStyle = '#ffe066';
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 16, 18, 0, 0, Math.PI*2);
+          ctx.fill();
+            ctx.fillStyle = '#222';
+            ctx.fillRect(-10, -4, 20, 8);
+          ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(-10, -4, 20, 8);
+            break;
+          case 'fire':
+            // 火焰哥：火焰头，整体向下偏移12像素以底部对齐
+            drawFlame(ctx, 0, 12, 0.7);
+            break;
+          case 'ice':
+            // 寒冰哥：雪花头
+            ctx.strokeStyle = '#00e0ff';
+            ctx.lineWidth = 3;
+            for(let i=0;i<6;i++){
+              ctx.save();
+              ctx.rotate(Math.PI/3*i);
+              ctx.beginPath();
+              ctx.moveTo(0,0); ctx.lineTo(0,-16); ctx.stroke();
+              ctx.restore();
+            }
+            ctx.beginPath();
+            ctx.arc(0,0,7,0,Math.PI*2);
+          ctx.stroke();
+            break;
+          case 'lightning':
+            // 打雷哥：闪电头
+            ctx.strokeStyle = '#fff700';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(-8,-12); ctx.lineTo(0,0); ctx.lineTo(-4,0); ctx.lineTo(8,12); ctx.stroke();
+            break;
+        }
+        ctx.restore();
+      }
+      function drawBullet(ctx, bullet) {
         ctx.save();
-        ctx.font = '16px Arial';
+        switch (bullet.type) {
+          case 'arrow': {
+            // 射手哥：白色带蓝描边箭头，带拖尾
+            ctx.save();
+            ctx.translate(bullet.position.x, bullet.position.y);
+            ctx.rotate(Math.atan2(bullet.velocity.y, bullet.velocity.x));
+            // 拖尾
+            let grad = ctx.createLinearGradient(-18, 0, 8, 0);
+            grad.addColorStop(0, 'rgba(108,207,255,0.2)');
+            grad.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.moveTo(-18, -3); ctx.lineTo(8, -1); ctx.lineTo(8, 1); ctx.lineTo(-18, 3); ctx.closePath();
+            ctx.fill();
+            // 箭头主体
+            ctx.strokeStyle = '#6cf';
+            ctx.lineWidth = 2;
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.moveTo(8, 0); ctx.lineTo(-8, -5); ctx.lineTo(-8, 5); ctx.closePath();
+            ctx.fill(); ctx.stroke();
+            ctx.restore();
+            break;
+          }
+          case 'fireball': {
+            // 火焰哥：橙红火球，发光，拖尾
+            ctx.save();
+            ctx.globalAlpha = 0.92;
+            let grad = ctx.createRadialGradient(bullet.position.x, bullet.position.y, 0, bullet.position.x, bullet.position.y, 16);
+            grad.addColorStop(0, '#fffbe0');
+            grad.addColorStop(0.2, '#ffb347');
+            grad.addColorStop(0.7, '#ff9800');
+            grad.addColorStop(1, '#a85600');
+            ctx.shadowColor = '#ff9800';
+            ctx.shadowBlur = 18;
+            ctx.beginPath();
+            ctx.arc(bullet.position.x, bullet.position.y, 13, 0, Math.PI*2);
+            ctx.fillStyle = grad;
+            ctx.fill();
+            // 拖尾
+            ctx.globalAlpha = 0.4;
+            ctx.beginPath();
+            ctx.ellipse(bullet.position.x-18*Math.cos(Math.atan2(bullet.velocity.y, bullet.velocity.x)), bullet.position.y-18*Math.sin(Math.atan2(bullet.velocity.y, bullet.velocity.x)), 10, 4, Math.atan2(bullet.velocity.y, bullet.velocity.x), 0, Math.PI*2);
+            ctx.fillStyle = '#ffb347';
+            ctx.fill();
+            ctx.restore();
+            break;
+          }
+          case 'ice': {
+            // 寒冰哥：冰蓝六边形/雪花弹，发光，拖尾
+            ctx.save();
+            ctx.translate(bullet.position.x, bullet.position.y);
+            ctx.rotate(Math.atan2(bullet.velocity.y, bullet.velocity.x));
+            ctx.shadowColor = '#00e0ff';
+            ctx.shadowBlur = 12;
+            ctx.strokeStyle = '#aef6ff';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            for(let i=0;i<6;i++){
+              let angle = Math.PI/3*i;
+              let x = Math.cos(angle)*9, y = Math.sin(angle)*9;
+              if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+            }
+            ctx.closePath();
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(0,0,4,0,Math.PI*2);
+            ctx.fillStyle = '#b3e6ff';
+            ctx.fill();
+            // 拖尾
+            ctx.globalAlpha = 0.3;
+            ctx.beginPath();
+            ctx.ellipse(-14, 0, 7, 3, 0, 0, Math.PI*2);
+            ctx.fillStyle = '#aef6ff';
+            ctx.fill();
+            ctx.restore();
+            break;
+          }
+          case 'laser': {
+            // 激光哥：激光头部亮点（柔和版）
+            ctx.save();
+            ctx.globalAlpha = 0.45;
+            ctx.beginPath();
+            ctx.arc(bullet.position.x, bullet.position.y, 10, 0, Math.PI*2);
+            ctx.fillStyle = '#ffe066';
+            ctx.shadowColor = '#ffe066';
+            ctx.shadowBlur = 6;
+            ctx.fill();
+            ctx.restore();
+            break;
+          }
+          case 'lightning': {
+            // 打雷哥：锯齿状闪电弹，发光
+            ctx.save();
+            ctx.translate(bullet.position.x, bullet.position.y);
+            ctx.rotate(Math.atan2(bullet.velocity.y, bullet.velocity.x));
+            ctx.strokeStyle = '#fff700';
+            ctx.lineWidth = 4;
+            ctx.shadowColor = '#fff700';
+            ctx.shadowBlur = 12;
+            ctx.beginPath();
+            ctx.moveTo(-8, 0);
+            ctx.lineTo(-4, -6);
+            ctx.lineTo(0, 0);
+            ctx.lineTo(4, 6);
+            ctx.lineTo(8, 0);
+            ctx.stroke();
+            ctx.restore();
+            break;
+          }
+          default: {
+            // 兜底：白色圆点
+            ctx.fillStyle = "#fff";
+            ctx.beginPath();
+            ctx.arc(bullet.position.x, bullet.position.y, 8, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+        ctx.restore();
+      }
+      // 1. drawHeartIcon函数
+      function drawHeartIcon(ctx, x, y, r, value) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(x, y + r * 0.3);
+        ctx.bezierCurveTo(x - r, y - r * 0.4, x - r, y + r * 0.8, x, y + r);
+        ctx.bezierCurveTo(x + r, y + r * 0.8, x + r, y - r * 0.4, x, y + r * 0.3);
+        ctx.closePath();
+        ctx.fillStyle = '#ff5a5a';
+        ctx.shadowColor = '#f88';
+        ctx.shadowBlur = 8;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.font = 'bold 18px Arial';
         ctx.fillStyle = '#fff';
         ctx.textAlign = 'center';
-        ctx.fillText(hero.name, hero.position.x, hero.position.y + 18);
+        ctx.textBaseline = 'middle';
+        ctx.fillText(value, x, y + r * 0.35);
         ctx.restore();
-        // 攻击范围（仅选中英雄显示，且为虚线，底部与英雄对齐）
-        if (selectedHeroIdx === idx) {
+      }
+      function draw(now) {
+        // 画布缩放适配，保证每帧都完整显示
+        fixCanvasDpi(canvas);
+        // 等比缩放，内容不拉伸
+        const scale = Math.min(canvas.width / STAGE_WIDTH, canvas.height / STAGE_HEIGHT);
+        ctx.setTransform(scale, 0, 0, scale, 0, 0);
+        ctx.clearRect(0, 0, STAGE_WIDTH, STAGE_HEIGHT);
+        player.heroes.forEach((hero, idx) => {
+          drawHeroIcon(ctx, hero);
           ctx.save();
-          ctx.setLineDash([8, 8]);
-          ctx.strokeStyle = 'rgba(255,255,0,0.7)';
-          ctx.lineWidth = 2;
-          ctx.strokeRect(
-            hero.rangeLeft(),
-            hero.rangeTop(),
-            hero.attackRange.width,
-            hero.attackRange.height
-          );
-          ctx.setLineDash([]);
+          ctx.font = '16px Arial';
+          ctx.fillStyle = '#fff';
+          ctx.textAlign = 'center';
+          ctx.fillText(hero.name, hero.position.x, hero.position.y + 18);
           ctx.restore();
-        }
-      });
-      // 新增：输出所有子弹comboIdx
-      console.log('draw all bullets', bullets.map(b => b.comboIdx));
-      bullets.forEach(bullet => {
-        drawBullet(ctx, bullet);
-      });
-      // 只在游戏开始后绘制敌人
-      if (gameStarted) {
-      enemies.forEach(enemy => {
-        try {
-          if (!enemy.visible) return;
-          ctx.save();
-          // 状态色优先
-          let mainColor = enemy.isBoss ? '#ff9800' : (enemy.type==='fast' ? '#00eaff' : (enemy.type==='tank' ? '#bfa76f' : '#3f3'));
-          let grad = null;
-          if (!enemy.isBoss && enemy.type === 'fast') {
-            // 速度型三角形（尖头向下）
-        ctx.save();
-        ctx.beginPath();
-            ctx.moveTo(enemy.position.x, enemy.position.y+enemy.radius); // 尖头向下
-            ctx.lineTo(enemy.position.x-enemy.radius, enemy.position.y-enemy.radius);
-            ctx.lineTo(enemy.position.x+enemy.radius, enemy.position.y-enemy.radius);
-            ctx.closePath();
-            ctx.fillStyle = mainColor;
-            ctx.shadowColor = mainColor;
-            ctx.shadowBlur = 8;
-        ctx.fill();
-            ctx.shadowBlur = 0;
-            ctx.strokeStyle = '#fff';
+          // 攻击范围（仅选中英雄显示，且为虚线，底部与英雄对齐）
+          if (selectedHeroIdx === idx) {
+            ctx.save();
+            ctx.setLineDash([8, 8]);
+            ctx.strokeStyle = 'rgba(255,255,0,0.7)';
             ctx.lineWidth = 2;
-            ctx.stroke();
-        ctx.restore();
-          } else if (!enemy.isBoss && enemy.type === 'tank') {
-            // 肉盾型盾牌（上方下尖）
-        ctx.save();
-            ctx.beginPath();
-            ctx.moveTo(enemy.position.x, enemy.position.y-enemy.radius); // 顶部
-            ctx.lineTo(enemy.position.x-enemy.radius, enemy.position.y+enemy.radius*0.5);
-            ctx.lineTo(enemy.position.x, enemy.position.y+enemy.radius);
-            ctx.lineTo(enemy.position.x+enemy.radius, enemy.position.y+enemy.radius*0.5);
-            ctx.closePath();
-            ctx.fillStyle = mainColor;
-            ctx.shadowColor = mainColor;
-            ctx.shadowBlur = 12;
-            ctx.fill();
-            ctx.shadowBlur = 0;
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 2;
-            ctx.stroke();
+            ctx.strokeRect(
+              hero.rangeLeft(),
+              hero.rangeTop(),
+              hero.attackRange.width,
+              hero.attackRange.height
+            );
+            ctx.setLineDash([]);
             ctx.restore();
-          } else {
-            // 其他类型和boss
-            if (enemy.isBoss) {
-              grad = ctx.createRadialGradient(enemy.position.x, enemy.position.y, enemy.radius*0.2, enemy.position.x, enemy.position.y, enemy.radius);
-              grad.addColorStop(0, '#fffbe0');
-              grad.addColorStop(0.3, '#ffb347');
-              grad.addColorStop(0.7, '#ff9800');
-              grad.addColorStop(1, '#a85600');
+          }
+        });
+        // 新增：输出所有子弹comboIdx
+        console.log('draw all bullets', bullets.map(b => b.comboIdx));
+        bullets.forEach(bullet => {
+          drawBullet(ctx, bullet);
+        });
+        // 只在游戏开始后绘制敌人
+        if (gameStarted) {
+        enemies.forEach(enemy => {
+          try {
+            if (!enemy.visible) return;
+            ctx.save();
+            // 状态色优先
+            let mainColor = enemy.isBoss ? '#ff9800' : (enemy.type==='fast' ? '#00eaff' : (enemy.type==='tank' ? '#bfa76f' : '#3f3'));
+            let grad = null;
+            if (!enemy.isBoss && enemy.type === 'fast') {
+              // 速度型三角形（尖头向下）
+          ctx.save();
+          ctx.beginPath();
+              ctx.moveTo(enemy.position.x, enemy.position.y+enemy.radius); // 尖头向下
+              ctx.lineTo(enemy.position.x-enemy.radius, enemy.position.y-enemy.radius);
+              ctx.lineTo(enemy.position.x+enemy.radius, enemy.position.y-enemy.radius);
+              ctx.closePath();
+              ctx.fillStyle = mainColor;
+              ctx.shadowColor = mainColor;
+              ctx.shadowBlur = 8;
+          ctx.fill();
+              ctx.shadowBlur = 0;
+              ctx.strokeStyle = '#fff';
+              ctx.lineWidth = 2;
+              ctx.stroke();
+          ctx.restore();
+            } else if (!enemy.isBoss && enemy.type === 'tank') {
+              // 肉盾型盾牌（上方下尖）
+          ctx.save();
+              ctx.beginPath();
+              ctx.moveTo(enemy.position.x, enemy.position.y-enemy.radius); // 顶部
+              ctx.lineTo(enemy.position.x-enemy.radius, enemy.position.y+enemy.radius*0.5);
+              ctx.lineTo(enemy.position.x, enemy.position.y+enemy.radius);
+              ctx.lineTo(enemy.position.x+enemy.radius, enemy.position.y+enemy.radius*0.5);
+              ctx.closePath();
+              ctx.fillStyle = mainColor;
+              ctx.shadowColor = mainColor;
+              ctx.shadowBlur = 12;
+              ctx.fill();
+              ctx.shadowBlur = 0;
+              ctx.strokeStyle = '#fff';
+              ctx.lineWidth = 2;
+              ctx.stroke();
+              ctx.restore();
             } else {
-              grad = ctx.createRadialGradient(enemy.position.x, enemy.position.y, enemy.radius*0.3, enemy.position.x, enemy.position.y, enemy.radius);
-              grad.addColorStop(0, '#fff');
-              grad.addColorStop(0.5, '#7fff7f');
-              grad.addColorStop(1, '#3f3');
-            }
-            // 状态色覆盖（Boss不被覆盖）
-            if (!enemy.isBoss) {
-              if (Date.now() < enemy.frozenUntil) { grad = null; mainColor = '#b3e6ff'; }
-              else if (Date.now() < enemy.slowUntil) { grad = null; mainColor = '#0ff'; }
-              else if (Date.now() < enemy.stunUntil) { grad = null; mainColor = '#fff700'; }
-            }
-        ctx.beginPath();
-        ctx.arc(enemy.position.x, enemy.position.y, enemy.radius, 0, Math.PI*2);
-            ctx.closePath();
-            ctx.fillStyle = grad ? grad : mainColor;
-            ctx.shadowColor = grad ? (enemy.isBoss ? '#ff9800' : '#7fff7f') : mainColor;
-            ctx.shadowBlur = enemy.isBoss ? 24 : 8;
-        ctx.fill();
-            ctx.shadowBlur = 0;
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            // Boss专属动态火焰环
-            if (enemy.isBoss) {
-              let t = Date.now()/400;
-              for(let i=0;i<16;i++){
-                let angle = i*Math.PI/8 + t;
-                let r = enemy.radius*1.18 + Math.sin(t*2+i)*3;
+              // 其他类型和boss
+              if (enemy.isBoss) {
+                grad = ctx.createRadialGradient(enemy.position.x, enemy.position.y, enemy.radius*0.2, enemy.position.x, enemy.position.y, enemy.radius);
+                grad.addColorStop(0, '#fffbe0');
+                grad.addColorStop(0.3, '#ffb347');
+                grad.addColorStop(0.7, '#ff9800');
+                grad.addColorStop(1, '#a85600');
+              } else {
+                grad = ctx.createRadialGradient(enemy.position.x, enemy.position.y, enemy.radius*0.3, enemy.position.x, enemy.position.y, enemy.radius);
+                grad.addColorStop(0, '#fff');
+                grad.addColorStop(0.5, '#7fff7f');
+                grad.addColorStop(1, '#3f3');
+              }
+              // 状态色覆盖（Boss不被覆盖）
+              if (!enemy.isBoss) {
+                if (Date.now() < enemy.frozenUntil) { grad = null; mainColor = '#b3e6ff'; }
+                else if (Date.now() < enemy.slowUntil) { grad = null; mainColor = '#0ff'; }
+                else if (Date.now() < enemy.stunUntil) { grad = null; mainColor = '#fff700'; }
+              }
+          ctx.beginPath();
+          ctx.arc(enemy.position.x, enemy.position.y, enemy.radius, 0, Math.PI*2);
+              ctx.closePath();
+              ctx.fillStyle = grad ? grad : mainColor;
+              ctx.shadowColor = grad ? (enemy.isBoss ? '#ff9800' : '#7fff7f') : mainColor;
+              ctx.shadowBlur = enemy.isBoss ? 24 : 8;
+          ctx.fill();
+              ctx.shadowBlur = 0;
+              ctx.strokeStyle = '#fff';
+              ctx.lineWidth = 2;
+              ctx.stroke();
+              // Boss专属动态火焰环
+              if (enemy.isBoss) {
+                let t = Date.now()/400;
+                for(let i=0;i<16;i++){
+                  let angle = i*Math.PI/8 + t;
+                  let r = enemy.radius*1.18 + Math.sin(t*2+i)*3;
+                  ctx.save();
+                  ctx.globalAlpha = 0.18+0.12*Math.sin(t*2+i);
+                  ctx.beginPath();
+                  ctx.arc(enemy.position.x+Math.cos(angle)*r, enemy.position.y+Math.sin(angle)*r, 7+2*Math.sin(t*3+i), 0, Math.PI*2);
+                  ctx.fillStyle = 'orange';
+                  ctx.shadowColor = '#ff9800';
+                  ctx.shadowBlur = 12;
+                  ctx.fill();
+                  ctx.restore();
+                }
+              }
+              // Boss头顶王冠
+              if (enemy.isBoss) {
                 ctx.save();
-                ctx.globalAlpha = 0.18+0.12*Math.sin(t*2+i);
+                let crownY = enemy.position.y - enemy.radius - 12;
                 ctx.beginPath();
-                ctx.arc(enemy.position.x+Math.cos(angle)*r, enemy.position.y+Math.sin(angle)*r, 7+2*Math.sin(t*3+i), 0, Math.PI*2);
-                ctx.fillStyle = 'orange';
-                ctx.shadowColor = '#ff9800';
-                ctx.shadowBlur = 12;
+                ctx.moveTo(enemy.position.x-18, crownY+10);
+                ctx.lineTo(enemy.position.x-12, crownY-2);
+                ctx.lineTo(enemy.position.x-6, crownY+10);
+                ctx.lineTo(enemy.position.x, crownY-6);
+                ctx.lineTo(enemy.position.x+6, crownY+10);
+                ctx.lineTo(enemy.position.x+12, crownY-2);
+                ctx.lineTo(enemy.position.x+18, crownY+10);
+                ctx.closePath();
+                ctx.fillStyle = '#ffe066';
+                ctx.shadowColor = '#ffe066';
+                ctx.shadowBlur = 10;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = '#bfa600';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                // 王冠宝石
+                ctx.beginPath();
+                ctx.arc(enemy.position.x, crownY+2, 3, 0, Math.PI*2);
+                ctx.fillStyle = '#ff3b3b';
+                ctx.shadowColor = '#ff3b3b';
+                ctx.shadowBlur = 8;
                 ctx.fill();
                 ctx.restore();
               }
             }
-            // Boss头顶王冠
+            // boss怒眉
             if (enemy.isBoss) {
               ctx.save();
-              let crownY = enemy.position.y - enemy.radius - 12;
+              ctx.strokeStyle = '#a85600';
+              ctx.lineWidth = 7;
               ctx.beginPath();
-              ctx.moveTo(enemy.position.x-18, crownY+10);
-              ctx.lineTo(enemy.position.x-12, crownY-2);
-              ctx.lineTo(enemy.position.x-6, crownY+10);
-              ctx.lineTo(enemy.position.x, crownY-6);
-              ctx.lineTo(enemy.position.x+6, crownY+10);
-              ctx.lineTo(enemy.position.x+12, crownY-2);
-              ctx.lineTo(enemy.position.x+18, crownY+10);
-              ctx.closePath();
-              ctx.fillStyle = '#ffe066';
-              ctx.shadowColor = '#ffe066';
-              ctx.shadowBlur = 10;
-              ctx.fill();
-              ctx.shadowBlur = 0;
-              ctx.strokeStyle = '#bfa600';
-              ctx.lineWidth = 2;
+              ctx.moveTo(enemy.position.x-enemy.radius*0.6, enemy.position.y-enemy.radius*0.6);
+              ctx.lineTo(enemy.position.x-enemy.radius*0.1, enemy.position.y-enemy.radius*0.25);
+              ctx.moveTo(enemy.position.x+enemy.radius*0.6, enemy.position.y-enemy.radius*0.6);
+              ctx.lineTo(enemy.position.x+enemy.radius*0.1, enemy.position.y-enemy.radius*0.25);
               ctx.stroke();
-              // 王冠宝石
-              ctx.beginPath();
-              ctx.arc(enemy.position.x, crownY+2, 3, 0, Math.PI*2);
-              ctx.fillStyle = '#ff3b3b';
-              ctx.shadowColor = '#ff3b3b';
-              ctx.shadowBlur = 8;
-              ctx.fill();
               ctx.restore();
             }
-          }
-          // boss怒眉
-          if (enemy.isBoss) {
+            // 眼睛
             ctx.save();
-            ctx.strokeStyle = '#a85600';
-            ctx.lineWidth = 7;
+            let eyeY = enemy.position.y - enemy.radius*0.2;
+            let eyeDX = enemy.radius*0.32;
             ctx.beginPath();
-            ctx.moveTo(enemy.position.x-enemy.radius*0.6, enemy.position.y-enemy.radius*0.6);
-            ctx.lineTo(enemy.position.x-enemy.radius*0.1, enemy.position.y-enemy.radius*0.25);
-            ctx.moveTo(enemy.position.x+enemy.radius*0.6, enemy.position.y-enemy.radius*0.6);
-            ctx.lineTo(enemy.position.x+enemy.radius*0.1, enemy.position.y-enemy.radius*0.25);
-            ctx.stroke();
-            ctx.restore();
-          }
-          // 眼睛
-          ctx.save();
-          let eyeY = enemy.position.y - enemy.radius*0.2;
-          let eyeDX = enemy.radius*0.32;
-          ctx.beginPath();
-          ctx.ellipse(enemy.position.x-eyeDX, eyeY, enemy.radius*0.16, enemy.radius*0.22, 0, 0, Math.PI*2);
-          ctx.ellipse(enemy.position.x+eyeDX, eyeY, enemy.radius*0.16, enemy.radius*0.22, 0, 0, Math.PI*2);
-          ctx.fillStyle = enemy.isBoss ? '#ff3b3b' : '#222';
-          ctx.shadowColor = enemy.isBoss ? '#ff3b3b' : 'transparent';
-          ctx.shadowBlur = enemy.isBoss ? 16 : 0;
-          ctx.fill();
-          ctx.shadowBlur = 0;
-          // boss怒眉（更粗更弯）
-          if (enemy.isBoss) {
-            ctx.save();
-            ctx.strokeStyle = '#a85600';
-            ctx.lineWidth = 7;
-            ctx.beginPath();
-            ctx.moveTo(enemy.position.x-eyeDX, eyeY-enemy.radius*0.22);
-            ctx.bezierCurveTo(enemy.position.x-eyeDX*0.7, eyeY-enemy.radius*0.32, enemy.position.x-eyeDX*0.3, eyeY-enemy.radius*0.08, enemy.position.x-eyeDX*0.1, eyeY-enemy.radius*0.05);
-            ctx.moveTo(enemy.position.x+eyeDX, eyeY-enemy.radius*0.22);
-            ctx.bezierCurveTo(enemy.position.x+eyeDX*0.7, eyeY-enemy.radius*0.32, enemy.position.x+eyeDX*0.3, eyeY-enemy.radius*0.08, enemy.position.x+eyeDX*0.1, eyeY-enemy.radius*0.05);
-            ctx.stroke();
-            ctx.restore();
-          }
-          ctx.restore();
-          // 嘴巴
-          ctx.save();
-          ctx.strokeStyle = '#222';
-          ctx.lineWidth = enemy.isBoss ? 6 : 2;
-          ctx.beginPath();
-          if (enemy.isBoss) {
-            ctx.arc(enemy.position.x, enemy.position.y+enemy.radius*0.32, enemy.radius*0.38, Math.PI*0.08, Math.PI*0.92, false);
-          } else {
-            ctx.arc(enemy.position.x, enemy.position.y+enemy.radius*0.28, enemy.radius*0.18, Math.PI*0.15, Math.PI*0.85, false);
-          }
-          ctx.stroke();
-          ctx.restore();
-          // Boss血条
-          if (enemy.isBoss) {
-            const barW = enemy.radius * 4.2;
-            const barH = 16;
-            const barX = enemy.position.x - barW/2;
-            const barY = enemy.position.y - enemy.radius - 32;
-            ctx.save();
-            // 血条底
-            ctx.fillStyle = '#2a0000';
-            ctx.fillRect(barX, barY, barW, barH);
-            // 残血变红闪烁
-            let hpPct = Math.max(0, enemy.hp/enemy.maxHp);
-            let barColor = hpPct < 0.3 ? (Math.floor(Date.now()/200)%2===0 ? '#ff2222' : '#ff9800') : '#ff9800';
-            // 流光渐变
-            let gradBar = ctx.createLinearGradient(barX, barY, barX+barW, barY);
-            gradBar.addColorStop(0, barColor);
-            gradBar.addColorStop(0.5, '#fff3b0');
-            gradBar.addColorStop(1, barColor);
-            ctx.fillStyle = gradBar;
-            ctx.fillRect(barX, barY, barW * hpPct, barH);
-            // 边框
-            ctx.strokeStyle = '#fff3b0';
-            ctx.lineWidth = 3;
-            ctx.strokeRect(barX, barY, barW, barH);
-            // BOSS字样和血量
-            ctx.font = 'bold 20px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'bottom';
-            ctx.lineWidth = 6;
-            ctx.strokeStyle = 'rgba(0,0,0,0.7)';
-            ctx.strokeText('BOSS', enemy.position.x, barY-4);
-            ctx.fillStyle = '#fff';
-            ctx.shadowColor = '#ff9800';
-            ctx.shadowBlur = 10;
-            ctx.fillText('BOSS', enemy.position.x, barY-4);
+            ctx.ellipse(enemy.position.x-eyeDX, eyeY, enemy.radius*0.16, enemy.radius*0.22, 0, 0, Math.PI*2);
+            ctx.ellipse(enemy.position.x+eyeDX, eyeY, enemy.radius*0.16, enemy.radius*0.22, 0, 0, Math.PI*2);
+            ctx.fillStyle = enemy.isBoss ? '#ff3b3b' : '#222';
+            ctx.shadowColor = enemy.isBoss ? '#ff3b3b' : 'transparent';
+            ctx.shadowBlur = enemy.isBoss ? 16 : 0;
+            ctx.fill();
             ctx.shadowBlur = 0;
-            ctx.font = 'bold 16px Arial';
-            ctx.fillStyle = '#fff3b0';
-            ctx.textBaseline = 'top';
-            ctx.strokeStyle = 'rgba(0,0,0,0.7)';
-            ctx.lineWidth = 4;
-            ctx.strokeText(`${Math.max(0, Math.round(enemy.hp))} / ${enemy.maxHp}`, enemy.position.x, barY+barH+4);
-            ctx.fillText(`${Math.max(0, Math.round(enemy.hp))} / ${enemy.maxHp}`, enemy.position.x, barY+barH+4);
-            ctx.restore();
-          } else {
-            // 普通怪血条
-        ctx.fillStyle = '#f44';
-        ctx.fillRect(enemy.position.x - 15, enemy.position.y - 28, 30 * (enemy.hp/enemy.maxHp), 4);
-          }
-          // 速度型加小闪电，肉盾型加小盾牌
-          if (!enemy.isBoss) {
-            if (enemy.type === 'fast') {
+            // boss怒眉（更粗更弯）
+            if (enemy.isBoss) {
               ctx.save();
-              ctx.strokeStyle = '#00eaff';
-              ctx.lineWidth = 2;
+              ctx.strokeStyle = '#a85600';
+              ctx.lineWidth = 7;
               ctx.beginPath();
-              ctx.moveTo(enemy.position.x-8, enemy.position.y-enemy.radius-6);
-              ctx.lineTo(enemy.position.x, enemy.position.y-enemy.radius+6);
-              ctx.lineTo(enemy.position.x+8, enemy.position.y-enemy.radius-6);
-              ctx.stroke();
-        ctx.restore();
-            } else if (enemy.type === 'tank') {
-              ctx.save();
-              ctx.strokeStyle = '#bfa76f';
-              ctx.lineWidth = 2;
-              ctx.beginPath();
-              ctx.arc(enemy.position.x, enemy.position.y-enemy.radius-6, 7, Math.PI, 0);
-              ctx.lineTo(enemy.position.x+7, enemy.position.y-enemy.radius-6);
-              ctx.lineTo(enemy.position.x-7, enemy.position.y-enemy.radius-6);
+              ctx.moveTo(enemy.position.x-eyeDX, eyeY-enemy.radius*0.22);
+              ctx.bezierCurveTo(enemy.position.x-eyeDX*0.7, eyeY-enemy.radius*0.32, enemy.position.x-eyeDX*0.3, eyeY-enemy.radius*0.08, enemy.position.x-eyeDX*0.1, eyeY-enemy.radius*0.05);
+              ctx.moveTo(enemy.position.x+eyeDX, eyeY-enemy.radius*0.22);
+              ctx.bezierCurveTo(enemy.position.x+eyeDX*0.7, eyeY-enemy.radius*0.32, enemy.position.x+eyeDX*0.3, eyeY-enemy.radius*0.08, enemy.position.x+eyeDX*0.1, eyeY-enemy.radius*0.05);
               ctx.stroke();
               ctx.restore();
             }
-          }
-          ctx.restore();
-        } catch(e) { console.error('Enemy draw error:', e); }
-      });
-      }
-      effects.forEach(eff => {
-        if (eff.type === "laser") {
-          const hero = eff.hero;
-          const now = Date.now();
-          let alpha = 0.18;
-          if (eff.lastTick && now - eff.lastTick < 80) alpha = 0.35;
-          ctx.save();
-          ctx.globalAlpha = alpha;
-          ctx.strokeStyle = "#ffe066";
-          ctx.lineWidth = eff.width;
-          ctx.beginPath();
-          ctx.moveTo(eff.from.x, eff.from.y);
-          ctx.lineTo(eff.to.x, eff.to.y);
-          ctx.stroke();
-          ctx.restore();
-        } else if (eff.type === "explosion-area") {
-          ctx.save();
-          ctx.beginPath();
-          ctx.arc(eff.x, eff.y, eff.r, 0, Math.PI*2);
-          ctx.fillStyle = "rgba(255,120,0,0.18)";
-          ctx.fill();
-          ctx.restore();
-        } else if (eff.type === "fire-flame") {
-          if (eff.target && eff.target.alive) {
-            // 判断是否刚造成伤害（即lastBurnTick在200ms内）
-            let alpha = 0.5;
-            if (eff.target.lastBurnTick && now - eff.target.lastBurnTick < 200) {
-              alpha = 1;
+            ctx.restore();
+            // 嘴巴
+            ctx.save();
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = enemy.isBoss ? 6 : 2;
+            ctx.beginPath();
+            if (enemy.isBoss) {
+              ctx.arc(enemy.position.x, enemy.position.y+enemy.radius*0.32, enemy.radius*0.38, Math.PI*0.08, Math.PI*0.92, false);
+            } else {
+              ctx.arc(enemy.position.x, enemy.position.y+enemy.radius*0.28, enemy.radius*0.18, Math.PI*0.15, Math.PI*0.85, false);
             }
+            ctx.stroke();
+            ctx.restore();
+            // Boss血条
+            if (enemy.isBoss) {
+              const barW = enemy.radius * 4.2;
+              const barH = 16;
+              const barX = enemy.position.x - barW/2;
+              const barY = enemy.position.y - enemy.radius - 32;
+              ctx.save();
+              // 血条底
+              ctx.fillStyle = '#2a0000';
+              ctx.fillRect(barX, barY, barW, barH);
+              // 残血变红闪烁
+              let hpPct = Math.max(0, enemy.hp/enemy.maxHp);
+              let barColor = hpPct < 0.3 ? (Math.floor(Date.now()/200)%2===0 ? '#ff2222' : '#ff9800') : '#ff9800';
+              // 流光渐变
+              let gradBar = ctx.createLinearGradient(barX, barY, barX+barW, barY);
+              gradBar.addColorStop(0, barColor);
+              gradBar.addColorStop(0.5, '#fff3b0');
+              gradBar.addColorStop(1, barColor);
+              ctx.fillStyle = gradBar;
+              ctx.fillRect(barX, barY, barW * hpPct, barH);
+              // 边框
+              ctx.strokeStyle = '#fff3b0';
+              ctx.lineWidth = 3;
+              ctx.strokeRect(barX, barY, barW, barH);
+              // BOSS字样和血量
+              ctx.font = 'bold 20px Arial';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'bottom';
+              ctx.lineWidth = 6;
+              ctx.strokeStyle = 'rgba(0,0,0,0.7)';
+              ctx.strokeText('BOSS', enemy.position.x, barY-4);
+              ctx.fillStyle = '#fff';
+              ctx.shadowColor = '#ff9800';
+              ctx.shadowBlur = 10;
+              ctx.fillText('BOSS', enemy.position.x, barY-4);
+              ctx.shadowBlur = 0;
+              ctx.font = 'bold 16px Arial';
+              ctx.fillStyle = '#fff3b0';
+              ctx.textBaseline = 'top';
+              ctx.strokeStyle = 'rgba(0,0,0,0.7)';
+              ctx.lineWidth = 4;
+              ctx.strokeText(`${Math.max(0, Math.round(enemy.hp))} / ${enemy.maxHp}`, enemy.position.x, barY+barH+4);
+              ctx.fillText(`${Math.max(0, Math.round(enemy.hp))} / ${enemy.maxHp}`, enemy.position.x, barY+barH+4);
+              ctx.restore();
+            } else {
+              // 普通怪血条
+          ctx.fillStyle = '#f44';
+          ctx.fillRect(enemy.position.x - 15, enemy.position.y - 28, 30 * (enemy.hp/enemy.maxHp), 4);
+            }
+            // 速度型加小闪电，肉盾型加小盾牌
+            if (!enemy.isBoss) {
+              if (enemy.type === 'fast') {
+                ctx.save();
+                ctx.strokeStyle = '#00eaff';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(enemy.position.x-8, enemy.position.y-enemy.radius-6);
+                ctx.lineTo(enemy.position.x, enemy.position.y-enemy.radius+6);
+                ctx.lineTo(enemy.position.x+8, enemy.position.y-enemy.radius-6);
+                ctx.stroke();
+          ctx.restore();
+              } else if (enemy.type === 'tank') {
+                ctx.save();
+                ctx.strokeStyle = '#bfa76f';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(enemy.position.x, enemy.position.y-enemy.radius-6, 7, Math.PI, 0);
+                ctx.lineTo(enemy.position.x+7, enemy.position.y-enemy.radius-6);
+                ctx.lineTo(enemy.position.x-7, enemy.position.y-enemy.radius-6);
+                ctx.stroke();
+                ctx.restore();
+              }
+            }
+            ctx.restore();
+          } catch(e) { console.error('Enemy draw error:', e); }
+        });
+        }
+        effects.forEach(eff => {
+          if (eff.type === "laser") {
+            const hero = eff.hero;
+            const now = Date.now();
+            let alpha = 0.18;
+            if (eff.lastTick && now - eff.lastTick < 80) alpha = 0.35;
             ctx.save();
             ctx.globalAlpha = alpha;
-            drawFlame(ctx, eff.target.position.x, eff.target.position.y, 1.5);
+            ctx.strokeStyle = "#ffe066";
+            ctx.lineWidth = eff.width;
+            ctx.beginPath();
+            ctx.moveTo(eff.from.x, eff.from.y);
+            ctx.lineTo(eff.to.x, eff.to.y);
+            ctx.stroke();
+            ctx.restore();
+          } else if (eff.type === "explosion-area") {
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(eff.x, eff.y, eff.r, 0, Math.PI*2);
+            ctx.fillStyle = "rgba(255,120,0,0.18)";
+            ctx.fill();
+            ctx.restore();
+          } else if (eff.type === "fire-flame") {
+            if (eff.target && eff.target.alive) {
+              // 判断是否刚造成伤害（即lastBurnTick在200ms内）
+              let alpha = 0.5;
+              if (eff.target.lastBurnTick && now - eff.target.lastBurnTick < 200) {
+                alpha = 1;
+              }
+              ctx.save();
+              ctx.globalAlpha = alpha;
+              drawFlame(ctx, eff.target.position.x, eff.target.position.y, 1.5);
+              ctx.restore();
+            }
+          } else if (eff.type === "ice-effect") {
+            if (eff.target && eff.target.alive) {
+              drawIceEffect(ctx, eff.target.position.x, eff.target.position.y, 1);
+            }
+          } else if (eff.type === "lightning") {
+            ctx.save();
+            ctx.strokeStyle = "#fff700";
+            ctx.lineWidth = 8;
+            ctx.beginPath();
+            ctx.moveTo(eff.x, eff.y-80);
+            ctx.lineTo(eff.x, eff.y+20);
+            ctx.stroke();
+            ctx.strokeStyle = "#fff";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(eff.x, eff.y-40);
+            ctx.lineTo(eff.x-15, eff.y-10);
+            ctx.moveTo(eff.x, eff.y-20);
+            ctx.lineTo(eff.x+20, eff.y+10);
+            ctx.stroke();
+            ctx.restore();
+          } else if (eff.type === "lightning-flash") {
+            ctx.save();
+            ctx.globalAlpha = 0.5;
+            ctx.beginPath();
+            ctx.arc(eff.x, eff.y, 40, 0, Math.PI*2);
+            ctx.fillStyle = "#fff";
+            ctx.fill();
             ctx.restore();
           }
-        } else if (eff.type === "ice-effect") {
-          if (eff.target && eff.target.alive) {
-            drawIceEffect(ctx, eff.target.position.x, eff.target.position.y, 1);
-          }
-        } else if (eff.type === "lightning") {
-          ctx.save();
-          ctx.strokeStyle = "#fff700";
-          ctx.lineWidth = 8;
-          ctx.beginPath();
-          ctx.moveTo(eff.x, eff.y-80);
-          ctx.lineTo(eff.x, eff.y+20);
-          ctx.stroke();
-          ctx.strokeStyle = "#fff";
-          ctx.lineWidth = 3;
-          ctx.beginPath();
-          ctx.moveTo(eff.x, eff.y-40);
-          ctx.lineTo(eff.x-15, eff.y-10);
-          ctx.moveTo(eff.x, eff.y-20);
-          ctx.lineTo(eff.x+20, eff.y+10);
-          ctx.stroke();
-          ctx.restore();
-        } else if (eff.type === "lightning-flash") {
-          ctx.save();
-          ctx.globalAlpha = 0.5;
-          ctx.beginPath();
-          ctx.arc(eff.x, eff.y, 40, 0, Math.PI*2);
-          ctx.fillStyle = "#fff";
-          ctx.fill();
-          ctx.restore();
-        }
-      });
-      drawDamageNumbers(ctx);
-      // 先画等级、经验、生命值，再画经验条，避免被遮挡
-      // 经验条
-      const barX = 20, barY = STAGE_HEIGHT-48, barW = STAGE_WIDTH-40, barH = 18;
-      ctx.save();
-      // 背景
-      ctx.fillStyle = '#222';
-      ctx.strokeStyle = '#6cf';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.roundRect(barX, barY, barW, barH, 8);
-      ctx.fill();
-      ctx.stroke();
-      // 进度
-      ctx.save();
-      ctx.beginPath();
-      ctx.roundRect(barX, barY, barW * (player.exp/(player.expThreshold[0]||1)), barH, 8);
-      ctx.clip();
-      const grad = ctx.createLinearGradient(barX, barY, barX+barW, barY);
-      grad.addColorStop(0, '#6cf');
-      grad.addColorStop(1, '#3cf');
-      ctx.fillStyle = grad;
-      ctx.fillRect(barX, barY, barW, barH);
-      ctx.restore();
-      // 文字
-      ctx.font = 'bold 16px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      // 文字描边增强可读性
-      ctx.lineWidth = 4;
-      ctx.strokeStyle = 'rgba(0,0,0,0.5)';
-      ctx.strokeText(`Lv.${player.level}  EXP: ${player.exp}/${player.expThreshold[0]||'-'}`, barX+barW/2, barY+barH/2);
-      ctx.fillStyle = '#fff';
-      ctx.fillText(`Lv.${player.level}  EXP: ${player.exp}/${player.expThreshold[0]||'-'}`, barX+barW/2, barY+barH/2);
-      ctx.restore();
-      // 游戏时间和生命值
-      if (gameStarted) {
+        });
+        drawDamageNumbers(ctx);
+        // 先画等级、经验、生命值，再画经验条，避免被遮挡
+        // 经验条
+        const barX = 20, barY = STAGE_HEIGHT-48, barW = STAGE_WIDTH-40, barH = 18;
         ctx.save();
-        ctx.font = '18px Arial';
-      ctx.fillStyle = '#fff';
-        const sec = Math.floor((now - gameStartTime) / 1000);
-        const min = Math.floor(sec/60);
-        const s = sec%60;
-        ctx.textAlign = 'left';
-        // 时间在左上
-        ctx.fillText(`时间: ${min}:${s.toString().padStart(2,'0')}`, 20, 32);
-        // 爱心生命值
-        drawHeartIcon(ctx, STAGE_WIDTH/2, 38, 20, player.life);
-        // 波次和剩余敌人纵向排列，爱心右侧
-        ctx.font = '15px Arial';
+        // 背景
+        ctx.fillStyle = '#222';
+        ctx.strokeStyle = '#6cf';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(barX, barY, barW, barH, 8);
+        ctx.fill();
+        ctx.stroke();
+        // 进度
+        ctx.save();
+        ctx.beginPath();
+        ctx.roundRect(barX, barY, barW * (player.exp/(player.expThreshold[0]||1)), barH, 8);
+        ctx.clip();
+        const grad = ctx.createLinearGradient(barX, barY, barX+barW, barY);
+        grad.addColorStop(0, '#6cf');
+        grad.addColorStop(1, '#3cf');
+        ctx.fillStyle = grad;
+        ctx.fillRect(barX, barY, barW, barH);
+        ctx.restore();
+        // 文字
+        ctx.font = 'bold 16px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        // 文字描边增强可读性
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+        ctx.strokeText(`Lv.${player.level}  EXP: ${player.exp}/${player.expThreshold[0]||'-'}`, barX+barW/2, barY+barH/2);
         ctx.fillStyle = '#fff';
-        ctx.textAlign = 'left';
-        ctx.fillText(`波次：${waveManager.currentWave}/${waveManager.totalWaves}`, STAGE_WIDTH/2+30, 32);
-        ctx.fillText(`剩余敌人：${enemies.filter(e=>e.visible).length}`, STAGE_WIDTH/2+30, 52);
-      ctx.restore();
+        ctx.fillText(`Lv.${player.level}  EXP: ${player.exp}/${player.expThreshold[0]||'-'}`, barX+barW/2, barY+barH/2);
+        ctx.restore();
+        // 游戏时间和生命值
+        if (gameStarted) {
+          ctx.save();
+          ctx.font = '18px Arial';
+      ctx.fillStyle = '#fff';
+          const sec = Math.floor((now - gameStartTime) / 1000);
+          const min = Math.floor(sec/60);
+          const s = sec%60;
+          ctx.textAlign = 'left';
+          // 时间在左上
+          ctx.fillText(`时间: ${min}:${s.toString().padStart(2,'0')}`, 20, 32);
+          // 爱心生命值
+          drawHeartIcon(ctx, STAGE_WIDTH/2, 38, 20, player.life);
+          // 波次和剩余敌人纵向排列，爱心右侧
+          ctx.font = '15px Arial';
+          ctx.fillStyle = '#fff';
+          ctx.textAlign = 'left';
+          ctx.fillText(`波次：${waveManager.currentWave}/${waveManager.totalWaves}`, STAGE_WIDTH/2+30, 32);
+          ctx.fillText(`剩余敌人：${enemies.filter(e=>e.visible).length}`, STAGE_WIDTH/2+30, 52);
+        ctx.restore();
+        }
+        // 4. 删除画布最上方的波次和剩余敌人（info.innerHTML = ...）
+        info.innerHTML = '';
+        // 绘制暂停和2倍速按钮（右上角）
+        const btnY0 = 100;
+        const btnGap = 56;
+        // 暂停按钮
+        ctx.save();
+        ctx.globalAlpha = paused ? 0.7 : 1;
+        ctx.beginPath();
+        ctx.arc(STAGE_WIDTH-38, btnY0, 22, 0, Math.PI*2);
+        ctx.fillStyle = '#444';
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(STAGE_WIDTH-48, btnY0-12); ctx.lineTo(STAGE_WIDTH-48, btnY0+12);
+        ctx.moveTo(STAGE_WIDTH-28, btnY0-12); ctx.lineTo(STAGE_WIDTH-28, btnY0+12);
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 5;
+        ctx.stroke();
+        ctx.restore();
+        // 2倍速按钮
+        ctx.save();
+        ctx.globalAlpha = speedMultiplier === 2 ? 1 : 0.7;
+        ctx.beginPath();
+        ctx.arc(STAGE_WIDTH-38, btnY0+btnGap, 22, 0, Math.PI*2);
+        ctx.fillStyle = '#444';
+        ctx.fill();
+        ctx.strokeStyle = '#6cf';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.font = 'bold 18px Arial';
+        ctx.fillStyle = '#6cf';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('2x', STAGE_WIDTH-38, btnY0+btnGap);
+        ctx.restore();
       }
-      // 4. 删除画布最上方的波次和剩余敌人（info.innerHTML = ...）
-      info.innerHTML = '';
-      // 绘制暂停和2倍速按钮（右上角）
-      const btnY0 = 100;
-      const btnGap = 56;
-      // 暂停按钮
-      ctx.save();
-      ctx.globalAlpha = paused ? 0.7 : 1;
-      ctx.beginPath();
-      ctx.arc(STAGE_WIDTH-38, btnY0, 22, 0, Math.PI*2);
-      ctx.fillStyle = '#444';
-      ctx.fill();
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(STAGE_WIDTH-48, btnY0-12); ctx.lineTo(STAGE_WIDTH-48, btnY0+12);
-      ctx.moveTo(STAGE_WIDTH-28, btnY0-12); ctx.lineTo(STAGE_WIDTH-28, btnY0+12);
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 5;
-      ctx.stroke();
-      ctx.restore();
-      // 2倍速按钮
-      ctx.save();
-      ctx.globalAlpha = speedMultiplier === 2 ? 1 : 0.7;
-      ctx.beginPath();
-      ctx.arc(STAGE_WIDTH-38, btnY0+btnGap, 22, 0, Math.PI*2);
-      ctx.fillStyle = '#444';
-      ctx.fill();
-      ctx.strokeStyle = '#6cf';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      ctx.font = 'bold 18px Arial';
-      ctx.fillStyle = '#6cf';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('2x', STAGE_WIDTH-38, btnY0+btnGap);
-      ctx.restore();
-    }
 
-    gameLoop();
+      gameLoop();
 
-    // 升级历史按钮逻辑
-    const historyBtn = document.getElementById('history-btn');
-    const historyPanel = document.getElementById('history-panel');
-    const historyList = document.getElementById('history-list');
-    const closeHistory = document.getElementById('close-history');
-    historyBtn.onclick = function() {
-      // 统计所有升级选项及次数
-      const counts = {};
-      player.upgradeHistory.forEach(item => {
-        if (!counts[item.text]) counts[item.text] = 0;
-        counts[item.text]++;
-      });
-      let html = '';
-      if (player.upgradeHistory.length === 0) {
-        html = '<div style="color:#aaa;">暂无升级记录</div>';
-      } else {
-        html = '<ul style="padding-left:1.2em;">';
-        Object.keys(counts).forEach(text => {
-          html += `<li><b>${text}</b> <span style="color:#6cf;">x${counts[text]}</span></li>`;
-        });
-        html += '</ul>';
-        html += '<hr style="border:1px solid #333;">';
-        html += '<div style="font-size:13px;color:#aaa;">详细记录：</div>';
-        html += '<ol style="padding-left:1.2em;">';
+      // 升级历史按钮逻辑
+      const historyBtn = document.getElementById('history-btn');
+      const historyPanel = document.getElementById('history-panel');
+      const historyList = document.getElementById('history-list');
+      const closeHistory = document.getElementById('close-history');
+      historyBtn.onclick = function() {
+        // 统计所有升级选项及次数
+        const counts = {};
         player.upgradeHistory.forEach(item => {
-          html += `<li>${item.time} - ${item.text}</li>`;
+          if (!counts[item.text]) counts[item.text] = 0;
+          counts[item.text]++;
         });
-        html += '</ol>';
-      }
-      historyList.innerHTML = html;
-      historyPanel.style.display = 'flex';
-    };
-    closeHistory.onclick = function() {
-      historyPanel.style.display = 'none';
-    };
-
-    function updateLifeBar() {
-      const bar = document.getElementById('life-bar');
-      let html = '';
-      const life = player.life;
-      const maxLife = 10;
-      for(let i=0;i<life;i++) {
-        html += `<span style="display:inline-block;width:28px;height:28px;margin:0 2px;vertical-align:middle;">
-          <svg width="28" height="28" viewBox="0 0 28 28"><path d="M14 24 Q4 16 7 10 Q10 4 14 8 Q18 4 21 10 Q24 16 14 24 Z" fill="#ff5a5a" stroke="#fff" stroke-width="2"/></svg>
-        </span>`;
-      }
-      for(let i=life;i<maxLife;i++) {
-        html += `<span style="display:inline-block;width:28px;height:28px;margin:0 2px;vertical-align:middle;opacity:0.25;">
-          <svg width="28" height="28" viewBox="0 0 28 28"><path d="M14 24 Q4 16 7 10 Q10 4 14 8 Q18 4 21 10 Q24 16 14 24 Z" fill="#ff5a5a" stroke="#fff" stroke-width="2"/></svg>
-        </span>`;
-      }
-      html += `<span style="font-size:20px;color:#fff;margin-left:8px;vertical-align:middle;">${life} / ${maxLife}</span>`;
-      bar.innerHTML = html;
-    }
-
-    // 在draw函数最后调用
-    updateLifeBar();
-
-    // 游戏结束弹窗逻辑
-    const gameoverPanel = document.getElementById('gameover-panel');
-    const gameoverTitle = document.getElementById('gameover-title');
-    const gameoverBtns = document.getElementById('gameover-btns');
-    function showGameOverPanel(type) {
-      gameOver = true;
-      paused = true;
-      if (type === 'win') {
-        gameoverTitle.innerText = '恭喜通关';
-        gameoverTitle.className = 'win';
-        gameoverBtns.innerHTML = '<button id="go-back-btn">返回</button>';
-      } else {
-        gameoverTitle.innerText = '游戏失败';
-        gameoverTitle.className = 'fail';
-        gameoverBtns.innerHTML = '<button id="go-back-btn">返回</button>' +
-          '<button id="retry-btn">重试</button>';
-      }
-      gameoverPanel.style.display = 'flex';
-      // 按钮事件
-      document.getElementById('go-back-btn').onclick = function() {
-        gameoverPanel.style.display = 'none';
-        resetGameToStartScreen();
+        let html = '';
+        if (player.upgradeHistory.length === 0) {
+          html = '<div style="color:#aaa;">暂无升级记录</div>';
+        } else {
+          html = '<ul style="padding-left:1.2em;">';
+          Object.keys(counts).forEach(text => {
+            html += `<li><b>${text}</b> <span style="color:#6cf;">x${counts[text]}</span></li>`;
+          });
+          html += '</ul>';
+          html += '<hr style="border:1px solid #333;">';
+          html += '<div style="font-size:13px;color:#aaa;">详细记录：</div>';
+          html += '<ol style="padding-left:1.2em;">';
+          player.upgradeHistory.forEach(item => {
+            html += `<li>${item.time} - ${item.text}</li>`;
+          });
+          html += '</ol>';
+        }
+        historyList.innerHTML = html;
+        historyPanel.style.display = 'flex';
       };
-      if (type === 'fail') {
-        document.getElementById('retry-btn').onclick = function() {
-          gameoverPanel.style.display = 'none';
-          restartGame();
-        };
+      closeHistory.onclick = function() {
+        historyPanel.style.display = 'none';
+      };
+
+      function updateLifeBar() {
+        const bar = document.getElementById('life-bar');
+        let html = '';
+        const life = player.life;
+        const maxLife = 10;
+        for(let i=0;i<life;i++) {
+          html += `<span style="display:inline-block;width:28px;height:28px;margin:0 2px;vertical-align:middle;">
+            <svg width="28" height="28" viewBox="0 0 28 28"><path d="M14 24 Q4 16 7 10 Q10 4 14 8 Q18 4 21 10 Q24 16 14 24 Z" fill="#ff5a5a" stroke="#fff" stroke-width="2"/></svg>
+          </span>`;
+        }
+        for(let i=life;i<maxLife;i++) {
+          html += `<span style="display:inline-block;width:28px;height:28px;margin:0 2px;vertical-align:middle;opacity:0.25;">
+            <svg width="28" height="28" viewBox="0 0 28 28"><path d="M14 24 Q4 16 7 10 Q10 4 14 8 Q18 4 21 10 Q24 16 14 24 Z" fill="#ff5a5a" stroke="#fff" stroke-width="2"/></svg>
+          </span>`;
+        }
+        html += `<span style="font-size:20px;color:#fff;margin-left:8px;vertical-align:middle;">${life} / ${maxLife}</span>`;
+        bar.innerHTML = html;
       }
-    }
-    // 返回到开始界面，重置所有状态
-    function resetGameToStartScreen() {
-      // 重置所有全局变量和状态
-      gameStarted = false;
-      gameOver = false;
-      paused = false;
-      // 重新创建 player、waveManager、enemies、bullets、effects
-      window.location.reload(); // 简单粗暴，刷新页面即可
-    }
-    // 重试，重新开始游戏
-    function restartGame() {
-      // 重置所有全局变量和状态
-      gameStarted = true;
-      gameOver = false;
-      paused = false;
-      // 重新创建 player、waveManager、enemies、bullets、effects
-      // 直接刷新页面并自动点击开始
-      window.location.reload();
-      // 更优雅的做法是重置所有对象并自动开始，但为保证状态彻底清理，这里直接刷新
-    }
-  </script>
+
+      // 在draw函数最后调用
+      updateLifeBar();
+
+      // 游戏结束弹窗逻辑
+      const gameoverPanel = document.getElementById('gameover-panel');
+      const gameoverTitle = document.getElementById('gameover-title');
+      const gameoverBtns = document.getElementById('gameover-btns');
+      function showGameOverPanel(type) {
+        gameOver = true;
+        paused = true;
+        if (type === 'win') {
+          gameoverTitle.innerText = '恭喜通关';
+          gameoverTitle.className = 'win';
+          gameoverBtns.innerHTML = '<button id="go-back-btn">返回</button>';
+        } else {
+          gameoverTitle.innerText = '游戏失败';
+          gameoverTitle.className = 'fail';
+          gameoverBtns.innerHTML = '<button id="go-back-btn">返回</button>' +
+            '<button id="retry-btn">重试</button>';
+        }
+        gameoverPanel.style.display = 'flex';
+        // 按钮事件
+        document.getElementById('go-back-btn').onclick = function() {
+          gameoverPanel.style.display = 'none';
+          resetGameToStartScreen();
+        };
+        if (type === 'fail') {
+          document.getElementById('retry-btn').onclick = function() {
+            gameoverPanel.style.display = 'none';
+            restartGame();
+          };
+        }
+      }
+      // 返回到开始界面，重置所有状态
+      function resetGameToStartScreen() {
+        // 重置所有全局变量和状态
+        gameStarted = false;
+        gameOver = false;
+        paused = false;
+        // 重新创建 player、waveManager、enemies、bullets、effects
+        window.location.reload(); // 简单粗暴，刷新页面即可
+      }
+      // 重试，重新开始游戏
+      function restartGame() {
+        // 重置所有全局变量和状态
+        gameStarted = true;
+        gameOver = false;
+        paused = false;
+        // 重新创建 player、waveManager、enemies、bullets、effects
+        // 直接刷新页面并自动点击开始
+        window.location.reload();
+        // 更优雅的做法是重置所有对象并自动开始，但为保证状态彻底清理，这里直接刷新
+      }
+    </script>
+  </div>
 </body>
 </html>
