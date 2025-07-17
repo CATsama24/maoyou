@@ -301,6 +301,7 @@
 
       // 2. 再定义函数
       function fixCanvasDpi(canvas) {
+        const dpr = window.devicePixelRatio || 1;
         const topUIH = document.getElementById('top-ui')?.offsetHeight || 0;
         const bottomSafe = 20;
         const availW = window.innerWidth;
@@ -309,12 +310,18 @@
           availH = window.visualViewport.height - topUIH - bottomSafe;
         }
         const scale = Math.min(availW / 750, availH / 1624);
-        const width = Math.round(750 * scale);
-        const height = Math.round(1624 * scale);
-        canvas.style.width = width + 'px';
-        canvas.style.height = height + 'px';
-        canvas.width = width;
-        canvas.height = height;
+        const cssWidth = Math.round(750 * scale);
+        const cssHeight = Math.round(1624 * scale);
+        // 物理像素尺寸
+        const realWidth = Math.round(cssWidth * dpr);
+        const realHeight = Math.round(cssHeight * dpr);
+        canvas.style.width = cssWidth + 'px';
+        canvas.style.height = cssHeight + 'px';
+        canvas.width = realWidth;
+        canvas.height = realHeight;
+        // 保证画布内容缩放到逻辑坐标
+        const ctx = canvas.getContext('2d');
+        ctx.setTransform(realWidth/750, 0, 0, realHeight/1624, 0, 0);
         STAGE_WIDTH = 750;
         STAGE_HEIGHT = 1624;
         HERO_Y = STAGE_HEIGHT - HERO_Y_OFFSET;
@@ -668,7 +675,14 @@
       class Bullet {
         constructor(position, angle, speed, damage, type, pierce=1, heroType, split=0, explosionRadius=0, freeze=0, excludeTarget=null, comboIdx) {
           this.position = { x: position.x, y: position.y };
-          this.velocity = { x: speed * Math.cos(angle), y: speed * Math.sin(angle) };
+          // 射手哥子弹速度加快30%
+          let speedBuff = speed;
+          if (heroType === 'archer') {
+            speedBuff = speed * 1.3;
+          } else {
+            speedBuff = speed * 4 / 3; // 其他子弹仍为之前的加速（如有需要可调整）
+          }
+          this.velocity = { x: speedBuff * Math.cos(angle), y: speedBuff * Math.sin(angle) };
           this.damage = damage;
           this.radius = type === 'fireball' ? 10 : (type === 'ice' ? 9 : 8);
           this.type = type;
@@ -714,19 +728,19 @@
           this.maxHp = hp;
           this.alive = true;
           this.type = enemyType;
-          // 固定速度
+          // 固定速度，怪物速度加快1/3
           if (isBoss) {
-            this.speed = 0.3 * 2/3;
+            this.speed = 0.3 * 2/3 * 4/3;
           } else if (enemyType === 'fast') {
-            this.speed = 0.9 * 2/3;
+            this.speed = 0.9 * 2/3 * 4/3;
             this.hp = Math.round(hp * 2 / 3);
             this.maxHp = this.hp;
           } else if (enemyType === 'tank') {
-            this.speed = 0.3 * 2/3;
+            this.speed = 0.3 * 2/3 * 4/3;
             this.hp = Math.round(hp * 2);
             this.maxHp = this.hp;
           } else {
-            this.speed = 0.6 * 2/3;
+            this.speed = 0.6 * 2/3 * 4/3;
           }
           this.slowUntil = 0;
           this.stunUntil = 0;
@@ -836,8 +850,8 @@
         spawnWave() {
           const enemies = [];
           const count = 5 + (this.currentWave - 1);
-          // 每2波增加基础值1的0%，即血量不再随波次提升，只保留基础值
-          let baseHp = 6;
+          // 每2波提升基础值的20%血量
+          let baseHp = 6 + Math.floor((this.currentWave-1)/2) * 6 * 0.2;
           const segments = Math.min(count, 8);
           const now = Date.now();
           const interval = 20000; // 20秒
@@ -859,12 +873,18 @@
           if (bossWaves.includes(this.currentWave)) {
             const bossCount = 1;
             for (let i = 0; i < bossCount; i++) {
-              let bossHp = 50, bossScale = 1.5;
+              // Boss血量也随基础值递增
+              let bossBase = 50;
+              if (this.currentWave === 10) bossBase = 100;
+              if (this.currentWave === 15) bossBase = 150;
+              if (this.currentWave === 20) bossBase = 200;
+              let bossHp = bossBase + Math.floor((this.currentWave-1)/2) * bossBase * 0.2;
+              let bossScale = 1.5;
+              if (this.currentWave === 10) bossScale = 2;
+              if (this.currentWave === 15) bossScale = 2.5;
+              if (this.currentWave === 20) bossScale = 3;
               let y = 100 + i * 120 + Math.random()*60 + STAGE_TOP_OFFSET;
               let x = STAGE_WIDTH/(bossCount+1)*(i+1);
-              if (this.currentWave === 10) { bossHp = 100; bossScale = 2; }
-              if (this.currentWave === 15) { bossHp = 150; bossScale = 2.5; }
-              if (this.currentWave === 20) { bossHp = 200; bossScale = 3; }
               enemies.push(new Enemy(x, y, bossHp, bossScale, true));
             }
           }
@@ -1007,7 +1027,20 @@
         if (inCircle(mx, my, pause.x, pause.y, pause.r)) {
           console.log('[按钮调试] 命中暂停按钮');
           paused = !paused;
-          requestAnimationFrame(gameLoop);
+          if (!paused) {
+            // 恢复时只启动一次主循环
+            if (!gameLoopRunning) {
+              gameLoopRunning = true;
+              gameLoopReqId = requestAnimationFrame(gameLoop);
+            }
+          } else {
+            // 暂停时停止主循环
+            gameLoopRunning = false;
+            if (gameLoopReqId) {
+              cancelAnimationFrame(gameLoopReqId);
+              gameLoopReqId = null;
+            }
+          }
           e.preventDefault && e.preventDefault();
           return;
         }
@@ -1095,19 +1128,27 @@
         nextWaveTime = Date.now() + 10000;
         gameStartTime = Date.now();
         fixCanvasDpi(canvas); // 确保参数同步
-        requestAnimationFrame(gameLoop); // 确保主循环启动
+        if (!gameLoopRunning) {
+          gameLoopRunning = true;
+          gameLoopReqId = requestAnimationFrame(gameLoop);
+        }
       }
       // 2倍速控制
       let speedMultiplier = 1;
       // 暂停功能
       let paused = false;
       let lastGameNow = Date.now();
+      // 新增：主循环运行标志，防止多重循环
+      let gameLoopRunning = false;
+      let gameLoopReqId = null;
       function gameLoop() {
-        requestAnimationFrame(gameLoop);
+        if (!gameLoopRunning) return;
+        gameLoopReqId = requestAnimationFrame(gameLoop);
         let now;
         if (paused || document.getElementById('upgrade-panel').style.display === 'flex' || gameOver) {
           now = lastGameNow;
-          draw(now);
+          draw(now); // 依然持续刷新UI
+          // 不return，继续下一帧
           return;
         } else {
           now = Date.now();
@@ -1681,7 +1722,6 @@
       }
       function draw(now) {
         fixCanvasDpi(canvas);
-        ctx.setTransform(canvas.width/750, 0, 0, canvas.height/1624, 0, 0);
         ctx.clearRect(0, 0, 750, 1624);
         player.heroes.forEach((hero, idx) => {
           drawHeroIcon(ctx, hero);
@@ -2099,27 +2139,33 @@
         ctx.globalAlpha = 1;
         ctx.beginPath();
         ctx.arc(pause.x, pause.y, pause.r, 0, Math.PI*2);
-        ctx.fillStyle = '#444';
+        ctx.fillStyle = '#222';
         ctx.fill();
-        ctx.strokeStyle = '#fff';
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#6cf';
+        ctx.lineWidth = 2.5;
         ctx.stroke();
         ctx.save();
         ctx.translate(pause.x, pause.y);
         if (paused) {
+          // 暂停时显示"播放"三角形
           ctx.beginPath();
-          ctx.moveTo(-8, -12); ctx.lineTo(12, 0); ctx.lineTo(-8, 12); ctx.closePath();
+          ctx.moveTo(-7, -12);
+          ctx.lineTo(11, 0);
+          ctx.lineTo(-7, 12);
+          ctx.closePath();
           ctx.fillStyle = '#6cf';
           ctx.shadowColor = '#6cf';
-          ctx.shadowBlur = 8;
+          ctx.shadowBlur = 10;
           ctx.fill();
         } else {
+          // 未暂停时显示"暂停"两条竖线
           ctx.beginPath();
-          ctx.moveTo(-8, -12); ctx.lineTo(-8, 12); ctx.moveTo(8, -12); ctx.lineTo(8, 12);
+          ctx.moveTo(-6, -10); ctx.lineTo(-6, 10);
+          ctx.moveTo(6, -10); ctx.lineTo(6, 10);
           ctx.strokeStyle = '#6cf';
-          ctx.lineWidth = 7;
+          ctx.lineWidth = 6;
           ctx.shadowColor = '#6cf';
-          ctx.shadowBlur = 8;
+          ctx.shadowBlur = 10;
           ctx.stroke();
         }
         ctx.restore();
