@@ -206,9 +206,10 @@
     <div id="top-ui">
       <div id="info" style="margin-top:8px;"></div>
       <div id="life-bar" style="margin:0 auto 8px auto;max-width:400px;text-align:center;"></div>
-      <div id="control-bar" style="display:flex;justify-content:center;align-items:center;gap:16px;margin:10px auto 0 auto;max-width:400px;">
-        <button id="speed-btn" style="flex:1 1 0;padding:10px 0;font-size:17px;background:#444;color:#fff;border:none;border-radius:10px;cursor:pointer;min-width:90px;">2倍速</button>
-        <button id="pause-btn" style="flex:1 1 0;padding:10px 0;font-size:17px;background:#444;color:#fff;border:none;border-radius:10px;cursor:pointer;min-width:90px;">暂停</button>
+      <div id="top-control-bar" style="display:flex;justify-content:center;align-items:center;gap:16px;margin:10px auto 0 auto;max-width:480px;">
+        <button id="history-btn" style="flex:1 1 0;padding:10px 0;font-size:17px;background:#444;color:#fff;border:none;border-radius:10px;cursor:pointer;min-width:90px;margin:0;">升级历史</button>
+        <button id="speed-btn" style="flex:1 1 0;padding:10px 0;font-size:17px;background:#444;color:#fff;border:none;border-radius:10px;cursor:pointer;min-width:90px;margin:0;">2倍速</button>
+        <button id="pause-btn" style="flex:1 1 0;padding:10px 0;font-size:17px;background:#444;color:#fff;border:none;border-radius:10px;cursor:pointer;min-width:90px;margin:0;">暂停</button>
       </div>
     </div>
     <div id="game-container" style="flex:1 1 0;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0;width:100vw;max-width:750px;margin:0 auto;position:relative;">
@@ -221,7 +222,6 @@
         <div id="upgrade-options"></div>
       </div>
     </div>
-    <button id="history-btn" style="display:block;margin:12px auto 0 auto;padding:10px 28px;font-size:18px;background:#444;color:#fff;border:none;border-radius:10px;cursor:pointer;">升级历史</button>
     <div id="history-panel" style="display:none;position:fixed;left:0;right:0;top:0;bottom:0;background:rgba(0,0,0,0.7);z-index:20;align-items:center;justify-content:center;">
       <div style="background:#222;border:2px solid #6cf;border-radius:12px;padding:32px 24px;min-width:220px;max-width:90vw;max-height:80vh;overflow:auto;text-align:left;box-shadow:0 0 24px #000;">
         <h2 style="color:#6cf;margin-bottom:18px;font-size:22px;">升级历史</h2>
