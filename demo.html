@@ -208,7 +208,6 @@
       <!-- 顶部按钮已去除，只保留信息栏 -->
     </div>
     <div id="game-container" style="flex:1 1 0;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0;width:100vw;max-width:750px;margin:0 auto;position:relative;">
-      <span id="version" style="position:absolute;left:8px;top:8px;z-index:10;font-size:16px;color:#aaa;user-select:none;pointer-events:none;">7.17 v2</span>
       <canvas id="game"></canvas>
     </div>
     <div id="upgrade-panel">
@@ -2226,6 +2225,15 @@
           ctx.stroke();
         }
         ctx.restore();
+        ctx.restore();
+        // 版本号
+        ctx.save();
+        ctx.font = 'bold 16px Arial';
+        ctx.fillStyle = '#aaa';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'top';
+        ctx.globalAlpha = 0.85;
+        ctx.fillText('7.17 v2', STAGE_WIDTH-16, 12);
         ctx.restore();
       }
 
