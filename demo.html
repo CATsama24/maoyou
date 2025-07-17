@@ -141,7 +141,7 @@
   </div>
   <div id="game-container" style="width:100vw;max-width:480px;margin:0 auto;position:relative;">
     <span id="version" style="position:absolute;left:8px;top:8px;z-index:10;font-size:16px;color:#aaa;user-select:none;pointer-events:none;">v1</span>
-    <canvas id="game" width="400" height="960" style="width:100vw;max-width:480px;height:auto;aspect-ratio:400/960;display:block;background:#222;border-radius:12px;"></canvas>
+    <canvas id="game" width="400" height="225" style="width:100vw;max-width:480px;height:auto;aspect-ratio:16/9;display:block;background:#222;border-radius:12px;"></canvas>
   </div>
   <div id="upgrade-panel">
     <div id="upgrade-box">
@@ -218,13 +218,23 @@
       const dpr = window.devicePixelRatio || 1;
       const maxW = Math.min(window.innerWidth, 480);
       const width = maxW;
-      const height = Math.round(width * 960 / 400);
+      const height = Math.round(width * 9 / 16);
       canvas.style.width = width + 'px';
       canvas.style.height = height + 'px';
       canvas.width = width * dpr;
       canvas.height = height * dpr;
       const ctx = canvas.getContext('2d');
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      // 同步全局舞台参数
+      STAGE_WIDTH = 400;
+      STAGE_HEIGHT = 225;
+      // 画布缩放后，所有渲染和判定都按比例缩放
+      const scale = height / 225;
+      window.CANVAS_SCALE = scale;
+      // 英雄Y坐标、战场高度等同步
+      HERO_Y = STAGE_HEIGHT - 30;
+      STAGE_PLAY_HEIGHT = STAGE_HEIGHT;
+      STAGE_TOP_OFFSET = 0;
     }
     // 修复：获取canvas、ctx、info
     const canvas = document.getElementById('game');
@@ -234,11 +244,11 @@
     const ctx = canvas.getContext('2d');
     const info = document.getElementById('info');
     // ================== 基础设置 ==================
-    const STAGE_WIDTH = 400;
-    const STAGE_HEIGHT = 1200 * 0.8; // 画布和战场高度都为960
-    const STAGE_PLAY_HEIGHT = 1200 * 0.8; // 实际战场高度
-    const STAGE_TOP_OFFSET = STAGE_HEIGHT - STAGE_PLAY_HEIGHT; // 上方压缩高度
-    const HERO_Y = STAGE_HEIGHT - 100;
+    let STAGE_WIDTH = 400;
+    let STAGE_HEIGHT = 225; // 16:9 默认
+    let HERO_Y = STAGE_HEIGHT - 30;
+    let STAGE_PLAY_HEIGHT = STAGE_HEIGHT;
+    let STAGE_TOP_OFFSET = 0;
     const HERO_MAX = 5;
     const HERO_MARGIN = 70;
 
@@ -1566,7 +1576,7 @@
         ctx.font = '16px Arial';
         ctx.fillStyle = '#fff';
         ctx.textAlign = 'center';
-        ctx.fillText(hero.name, hero.position.x, hero.position.y + 28);
+        ctx.fillText(hero.name, hero.position.x, hero.position.y + 18);
         ctx.restore();
         // 攻击范围（仅选中英雄显示，且为虚线，底部与英雄对齐）
         if (selectedHeroIdx === idx) {
