@@ -306,16 +306,9 @@
         const bottomSafe = 20;
         const availW = window.innerWidth;
         const availH = window.innerHeight - topUIH - bottomSafe;
-        let width = availW, height = availH;
-        if (availW / 750 < availH / 1624) {
-          // 以宽为准
-          width = availW;
-          height = Math.round(width * 1624 / 750);
-        } else {
-          // 以高为准
-          height = availH;
-          width = Math.round(height * 750 / 1624);
-        }
+        const scale = Math.min(availW / 750, availH / 1624);
+        const width = Math.round(750 * scale);
+        const height = Math.round(1624 * scale);
         canvas.style.width = width + 'px';
         canvas.style.height = height + 'px';
         canvas.width = width * dpr;
