@@ -1302,8 +1302,8 @@
               if (dist < bullet.radius + enemyRadius) {
                 bullet.hitEnemies.add(enemy);
                 if (bullet.type === "fireball") {
-                  // 爆炸：以命中目标为圆心，爆炸半径为3x敌人半径
-                  const explosionRadius = enemy.radius * 3;
+                  // 爆炸：以命中目标为圆心，爆炸半径为固定100
+                  const explosionRadius = 100;
                   effects.push({type: "explosion-area", x: enemy.position.x, y: enemy.position.y, r: explosionRadius, start: Date.now(), duration: 200});
                   enemies.forEach(e2 => {
                     if (e2.alive && distance(e2.position, enemy.position) <= explosionRadius) {
@@ -2212,7 +2212,7 @@
         ctx.stroke();
         ctx.save();
         ctx.translate(pause.x, pause.y);
-        console.log('暂停按钮绘制，paused=' + window.paused);
+        // 修正：暂停时为三角，未暂停为两条竖线
         if (window.paused) {
           // 暂停时显示"播放"三角形
           ctx.beginPath();
