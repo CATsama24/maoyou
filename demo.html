@@ -785,7 +785,7 @@
           this.type = enemyType;
           // 敌人速度调整：非boss加快0.2，boss减慢0.3
           if (isBoss) {
-            this.speed = 0.3 * 2/3 * 4/3 + 0.3;
+            this.speed = 0.15;
           } else if (enemyType === 'fast') {
             this.speed = 0.9 * 2/3 * 4/3 + 0.2;
             this.hp = Math.round(hp * 2 / 3);
