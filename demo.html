@@ -662,8 +662,10 @@
         fireballAttack(targets, bullets, effects, comboIdx) {
           const target = targets[0];
           if (!target) return;
-          const fixedExplosionRadius = 27 * 2;
-          bullets.push(new Bullet(this.position, Math.atan2(target.y - this.position.y, target.x - this.position.x), 13, this.damage * (1 + this.fireDamageBonus), "fireball", 1, this.type, 0, fixedExplosionRadius, 0, null, comboIdx));
+          // 爆炸半径受 fireExplosionBonus 影响
+          const baseExplosionRadius = 27 * 2;
+          const explosionRadius = baseExplosionRadius * (1 + this.fireExplosionBonus);
+          bullets.push(new Bullet(this.position, Math.atan2(target.y - this.position.y, target.x - this.position.x), 13, this.damage * (1 + this.fireDamageBonus), "fireball", 1, this.type, 0, explosionRadius, 0, null, comboIdx));
         }
         iceAttack(targets, bullets, effects, comboIdx) {
           const target = targets[0];
@@ -905,8 +907,8 @@
         spawnWave() {
           const enemies = [];
           const count = 5 + (this.currentWave - 1);
-          // 每2波提升基础值的20%血量
-          let baseHp = 6 + Math.floor((this.currentWave-1)/2) * 6 * 0.2;
+          // 每2波提升基础值的40%血量
+          let baseHp = 6 + Math.floor((this.currentWave-1)/2) * 6 * 0.4;
           const segments = Math.min(count, 8);
           const now = Date.now();
           const interval = 20000; // 20秒
@@ -928,12 +930,12 @@
           if (bossWaves.includes(this.currentWave)) {
             const bossCount = 1;
             for (let i = 0; i < bossCount; i++) {
-              // Boss血量也随基础值递增
+              // Boss血量只与当前波次固定，不随波数递增
               let bossBase = 50;
               if (this.currentWave === 10) bossBase = 100;
               if (this.currentWave === 15) bossBase = 150;
               if (this.currentWave === 20) bossBase = 200;
-              let bossHp = bossBase + Math.floor((this.currentWave-1)/2) * bossBase * 0.2;
+              let bossHp = bossBase;
               let bossScale = 1.5;
               if (this.currentWave === 10) bossScale = 2;
               if (this.currentWave === 15) bossScale = 2.5;
