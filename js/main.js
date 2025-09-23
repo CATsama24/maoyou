@@ -313,13 +313,14 @@ class GameScene extends Phaser.Scene {
             // 重新调整游戏尺寸
             this.scale.resize(GameConfig.width, GameConfig.height);
 
-            // 更新物理世界边界
+            // 更新物理世界边界 - 确保与新画布大小匹配
             this.physics.world.setBounds(0, 0, GameConfig.width, GameConfig.height);
 
             // 重新调整地图
             this.resizeMap();
 
             console.log(`窗口大小变化 - 新尺寸: ${GameConfig.width}x${GameConfig.height}`);
+            console.log(`更新物理世界边界: ${GameConfig.width}x${GameConfig.height}`);
         });
     }
 
@@ -366,10 +367,29 @@ class GameScene extends Phaser.Scene {
             }
         }
         
-        // 创建玩家精灵
-        this.player = this.physics.add.sprite(GameConfig.width / 2, GameConfig.height / 2, playerTexture);
+        // 创建玩家精灵 - 使用固定的初始纹理
+        const initialTexture = this.textures.exists('player_idle_down_sheet_spritesheet') ?
+            'player_idle_down_sheet_spritesheet' : playerTexture;
+
+        this.player = this.physics.add.sprite(GameConfig.width / 2, GameConfig.height / 2, initialTexture);
         this.player.setCollideWorldBounds(true);
-        this.player.setScale(1.25); // 调整大小为2.5倍放大
+
+        console.log(`创建玩家使用的纹理: ${initialTexture}`);
+        console.log(`原始纹理: ${playerTexture}`);
+        console.log(`纹理存在: ${this.textures.exists(initialTexture)}`);
+
+        // 强制设置正确的缩放 - 基于帧大小96x80，目标80x100
+        const targetWidth = 80;
+        const targetHeight = 100;
+        const currentFrameWidth = 96;
+        const currentFrameHeight = 80;
+
+        const scaleX = targetWidth / currentFrameWidth;
+        const scaleY = targetHeight / currentFrameHeight;
+        const scale = Math.min(scaleX, scaleY);
+
+        this.player.setScale(scale);
+        console.log(`计算缩放: ${scale} (目标: ${targetWidth}x${targetHeight}, 当前帧: ${currentFrameWidth}x${currentFrameHeight})`);
         
         // 设置玩家物理属性
         this.player.setMaxVelocity(GameConfig.player.speed, GameConfig.player.speed);
@@ -379,16 +399,26 @@ class GameScene extends Phaser.Scene {
         this.player.body.setSize(80, 80); // 80x80像素的碰撞范围
 
         // 调试信息：输出玩家大小和碰撞体设置
+        console.log(`玩家纹理大小: ${this.player.texture.source[0].width}x${this.player.texture.source[0].height}`);
         console.log(`玩家显示大小: ${this.player.displayWidth}x${this.player.displayHeight}`);
         console.log(`碰撞体大小: ${this.player.body.width}x${this.player.body.height}`);
-        console.log(`碰撞体偏移: (${this.player.body.offset.x}, ${this.player.body.offset.y})`);
 
-        // 设置碰撞体偏移，确保碰撞体居中
+        // 计算正确的偏移，确保碰撞体居中
         const offsetX = (this.player.displayWidth - 80) / 2;
         const offsetY = (this.player.displayHeight - 80) / 2;
         this.player.body.setOffset(offsetX, offsetY);
-        console.log(`计算的偏移: (${offsetX}, ${offsetY})`);
-        
+        console.log(`碰撞体偏移: (${offsetX}, ${offsetY})`);
+
+        // 重新检查边界
+        console.log(`游戏画布大小: ${this.game.canvas.width}x${this.game.canvas.height}`);
+        console.log(`物理世界边界: ${this.physics.world.bounds.width}x${this.physics.world.bounds.height}`);
+
+        // 强制设置正确的纹理
+        if (this.anims.exists('idle_down')) {
+            this.player.play('idle_down');
+            console.log(`强制播放idle_down动画`);
+        }
+
         // 创建玩家动画
         this.createPlayerAnimations();
         
@@ -573,23 +603,29 @@ class GameScene extends Phaser.Scene {
         console.log(`图片尺寸: ${texture.source[0].width}x${texture.source[0].height}`);
         console.log(`计算帧尺寸: ${frameSize.width}x${frameSize.height}`);
         
-        // 创建spritesheet纹理
+        // 检查spritesheet纹理是否已存在，避免重复创建
         const spritesheetKey = `${spriteSheetKey}_spritesheet`;
-        this.textures.addSpriteSheet(spritesheetKey, texture.source[0].image, {
-            frameWidth: frameSize.width,
-            frameHeight: frameSize.height
-        });
-        
-        // 使用Phaser的内置序列帧功能
-        this.anims.create({
-            key: animKey,
-            frames: this.anims.generateFrameNumbers(spritesheetKey, {
-                start: 0,
-                end: frameCount - 1
-            }),
-            frameRate: this.getFrameRateForState(state),
-            repeat: this.getRepeatForState(state)
-        });
+        if (!this.textures.exists(spritesheetKey)) {
+            console.log(`创建spritesheet纹理: ${spritesheetKey}`);
+            this.textures.addSpriteSheet(spritesheetKey, texture.source[0].image, {
+                frameWidth: frameSize.width,
+                frameHeight: frameSize.height
+            });
+        }
+
+        // 检查动画是否已存在，避免重复创建
+        if (!this.anims.exists(animKey)) {
+            console.log(`创建动画: ${animKey}`);
+            this.anims.create({
+                key: animKey,
+                frames: this.anims.generateFrameNumbers(spritesheetKey, {
+                    start: 0,
+                    end: frameCount - 1
+                }),
+                frameRate: this.getFrameRateForState(state),
+                repeat: this.getRepeatForState(state)
+            });
+        }
     }
 
     // 根据状态获取帧率
@@ -913,7 +949,7 @@ class GameScene extends Phaser.Scene {
         this.updateUI();
 
         // 调试信息：输出玩家位置（减少频率）
-        if (time % 1000 < 50) { // 每秒输出一次
+        if (time % 2000 < 50) { // 每2秒输出一次
             console.log(`玩家位置: (${this.player.x.toFixed(1)}, ${this.player.y.toFixed(1)})`);
         }
     }
